@@ -1,0 +1,43 @@
+CREATE OR REPLACE VIEW acc.viw_repjor AS
+ SELECT d.jor_id AS "Entry ID",
+    d.debit AS "Debit",
+    d.credit AS "Credit",
+    sum(d.debit - d.credit) OVER (PARTITION BY d.chart_id ORDER BY d.ctid) AS "Balance",
+    d.chart_id AS "Account ID",
+    chart.aname AS "Account Name",
+    doctype.aname AS "Document Type Name",
+    d.doc_id AS "Document ID",
+    d.currency_id AS "Currency ID",
+    currency.aname AS "Currency Name",
+    d.currencyprice AS "Currency Price",
+    jortype.aname AS "Entry Type",
+    d.yyyy AS "Year",
+    d.mm AS "Month",
+    d.ref,
+    d.notes AS "Notes",
+    d.company_id AS "Company ID",
+    com.aname AS "Company Name",
+    d.fyear_id AS "Fyear ID",
+    fyear.aname AS "Fyear Name",
+    d.branch_id AS "Branch ID",
+    d.cc1_id AS "Cost Center 1 ID",
+    cc1.aname AS "Cost Center 1 Name",
+    d.cc2_id AS "Cost Center 2 ID",
+    cc2.aname AS "Cost Center 2 Name",
+    d.creationtime AS "Date",
+    d.createservertime AS "Server Time",
+    d.createuser_id AS "User ID",
+    users.aname AS "User Name",
+    d.edit AS "Edited",
+    chart.notes
+   FROM acc.tbl_jord d
+     LEFT JOIN acc.tbl_chart chart ON d.chart_id = chart.id::text
+     LEFT JOIN grl.tbl_doctype doctype ON d.doctype_id = doctype.id
+     LEFT JOIN grl.tbl_currencies currency ON d.currency_id::text = currency.id::text
+     LEFT JOIN acc.tbl_jortype jortype ON d.jortype_id = jortype.id::text
+     LEFT JOIN grl.tbl_companies com ON d.company_id::text = com.id::text
+     LEFT JOIN grl.tbl_fyears fyear ON d.fyear_id::text = fyear.id::text
+     LEFT JOIN acc.tbl_cc cc1 ON d.cc1_id::text = cc1.id::text
+     LEFT JOIN acc.tbl_cc cc2 ON d.cc2_id::text = cc2.id::text
+     LEFT JOIN grl.tbl_users users ON d.createuser_id::text = users.id::text
+  ORDER BY d.ctid;

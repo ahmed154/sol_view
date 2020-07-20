@@ -1,0 +1,1370 @@
+DROP FUNCTION IF EXISTS acc.fnc_jor_insert(character varying, character varying, numeric, text, text, character varying, character varying, character varying, character varying, character varying, timestamp without time zone, character varying, json);
+DROP FUNCTION IF EXISTS acc.fnc_jor_update(character varying, character varying, numeric, text, text, character varying, character varying, character varying, character varying, character varying, timestamp without time zone, character varying, json);
+DROP FUNCTION IF EXISTS acc.fnc_jor_delete(character varying, character varying, character varying);
+DROP FUNCTION IF EXISTS acc.fnc_jor_select(character varying, integer, character varying, character varying, text);
+DROP FUNCTION IF EXISTS acc.fnc_cin_post(character varying, timestamp without time zone, character varying, character varying);
+DROP FUNCTION IF EXISTS acc.fnc_cin_postcancel(character varying, timestamp without time zone, character varying, character varying);
+DROP FUNCTION IF EXISTS acc.fnc_cout_post(character varying, timestamp without time zone, character varying, character varying);
+DROP FUNCTION IF EXISTS acc.fnc_cout_postcancel(character varying, timestamp without time zone, character varying, character varying);
+
+DROP VIEW IF EXISTS acc.viw_jor_select;
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+INSERT INTO grl.tbl_events(id, aname, ename)VALUES (60, 'ÇÖÇÝÉ ÓäÏ ÞÈÖ', 'Add Cash Receipt')on conflict (id) do nothing;
+INSERT INTO grl.tbl_events(id, aname, ename)VALUES (61, 'ÊÚÏíá ÓäÏ ÞÈÖ', 'Update Cash Receipt')on conflict (id) do nothing;
+INSERT INTO grl.tbl_events(id, aname, ename)VALUES (62, 'ÍÐÝ ÓäÏ ÞÈÖ', 'Delete Cash Receipt')on conflict (id) do nothing;
+INSERT INTO grl.tbl_events(id, aname, ename)VALUES (63, 'ÊÑÍíá ÓäÏ ÞÈÖ', 'Cash Receipt Post')on conflict (id) do nothing;
+INSERT INTO grl.tbl_events(id, aname, ename)VALUES (64, 'ÅáÛÇÁ ÊÑÍíá ÓäÏ ÞÈÖ', 'Cancel Cash Receipt Post')on conflict (id) do nothing;
+
+INSERT INTO grl.tbl_events(id, aname, ename)VALUES (65, 'ÇÖÇÝÉ ÓäÏ ÕÑÝ', 'Add payment voucher')on conflict (id) do nothing;
+INSERT INTO grl.tbl_events(id, aname, ename)VALUES (65, 'ÊÚÏíá ÓäÏ ÕÑÝ', 'Update payment voucher')on conflict (id) do nothing;
+INSERT INTO grl.tbl_events(id, aname, ename)VALUES (67, 'ÍÐÝ ÓäÏ ÕÑÝ', 'Delete payment voucher')on conflict (id) do nothing;
+INSERT INTO grl.tbl_events(id, aname, ename)VALUES (68, 'ÊÑÍíá ÓäÏ ÕÑÝ', 'payment voucher Post')on conflict (id) do nothing;
+INSERT INTO grl.tbl_events(id, aname, ename)VALUES (69, 'ÅáÛÇÁ ÊÑÍíá ÓäÏ ÕÑÝ', 'Cancel payment voucher Post')on conflict (id) do nothing;
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+alter table acc.tbl_cin add column IF NOT EXISTS postedjor_id  character varying(15);
+alter table acc.tbl_cout add column IF NOT EXISTS postedjor_id  character varying(15);
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+alter table acc.tbl_jor alter column doctype_id type smallint using doctype_id::smallint;
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE VIEW acc.viw_cout_select AS
+ SELECT h.id AS h_id,
+    h.sequ AS h_sequ,
+    h.notes AS h_notes,
+    h.jor_id AS h_jor_id,
+    h.posted AS h_posted,
+    h.frozen AS h_frozen,
+    h.closed AS h_closed,
+    h.creationtime AS h_creationtime,
+    h.createservertime AS h_createservertime,
+    h.createuser_id AS h_createuser_id,
+    h.edit AS h_edit,
+    h.cc1_id AS h_cc1_id,
+    h.cc2_id AS h_cc2_id,
+    h.fyear_id AS h_fyear_id,
+    h.branch_id AS h_branch_id,
+    h.company_id AS h_company_id,
+    d.cout_id AS d_cout_id,
+    d.jor_id AS d_jor_id,
+    d.amount AS d_amount,
+    d.chart_cin_id AS d_chart_cin_id,
+    chartin.aname AS d_chart_cin_aname,
+    chartin.ename AS d_chart_cin_ename,
+    d.chart_cout_id AS d_chart_cout_id,
+    chartout.aname AS d_chart_cout_aname,
+    chartout.ename AS d_chart_cout_ename,
+    d.notes AS d_notes,
+    d.paytype_id AS d_paytype_id,
+    paytype.aname AS d_paytype_aname,
+    paytype.ename AS d_paytype_ename,
+    d.bank_id AS d_bank_id,
+    bank.aname AS d_bank_aname,
+    bank.ename AS d_bank_ename,
+    d.checkcardno AS d_checkcardno,
+    d.checkcarddate AS d_checkcarddate,
+    d.sorno AS d_sorno,
+    d.salno AS d_salno,
+    d.billdate AS d_billdate,
+    d.manualno AS d_manualno,
+    d.currency_id AS d_currency_id,
+    currency.aname AS d_currency_aname,
+    currency.ename AS d_currency_ename,
+    d.currencyprice AS d_currency_price,
+    d.posted AS d_posted,
+    d.frozen AS d_frozen,
+    d.closed AS d_closed,
+    d.creationtime AS d_creationtime,
+    d.createservertime AS d_createservertime,
+    d.createuser_id AS d_createuser_id,
+    d.edit AS d_edit,
+    d.cc1_id AS d_cc1_id,
+    cc1.aname AS d_cc1_aname,
+    cc1.ename AS d_cc1_ename,
+    d.cc2_id AS d_cc2_id,
+    cc2.aname AS d_cc2_aname,
+    cc2.ename AS d_cc2_ename,
+    d.fyear_id AS d_fyear_id,
+    d.branch_id AS d_branch_id,
+    branch.aname AS d_branch_aname,
+    branch.ename AS d_branch_ename,
+    d.company_id AS d_company_id
+   FROM acc.tbl_coutd d
+     LEFT JOIN acc.tbl_cout h ON d.cout_id::text = h.id::text
+     LEFT JOIN acc.tbl_chart chartin ON d.chart_cin_id = chartin.id::text
+     LEFT JOIN acc.tbl_chart chartout ON d.chart_cout_id = chartout.id::text
+     LEFT JOIN grl.tbl_paytype paytype ON d.paytype_id = paytype.id
+     LEFT JOIN grl.tbl_bank bank ON d.bank_id = bank.id
+     LEFT JOIN grl.tbl_currencies currency ON d.currency_id::text = currency.id::text
+     LEFT JOIN acc.tbl_cc cc1 ON d.cc1_id::text = cc1.id::text
+     LEFT JOIN acc.tbl_cc cc2 ON d.cc2_id::text = cc2.id::text
+     LEFT JOIN grl.tbl_branches branch ON d.branch_id::text = branch.id::text
+  WHERE branch.company_id::text = d.company_id::text
+  ORDER BY d.ctid;
+------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE VIEW acc.viw_jor_select AS
+ SELECT h.id AS h_id,
+    h.doctype_id AS h_doctype_id,
+    h.sequ AS h_sequ,
+    h.doc_id AS h_doc_id,
+    h.currency_id AS h_currency_id,
+    h.currencyprice AS h_currencyprice,
+    h.jortype_id AS h_jortype_id,
+    h.notes AS h_notes,
+    h.branch_id AS h_branch_id,
+    h.company_id AS h_company_id,
+    h.cc1_id AS h_cc1_id,
+    h.cc2_id AS h_cc2_id,
+    h.creationtime AS h_creationtime,
+    h.createuser_id AS h_createuser_id,
+    d.debit AS d_debit,
+    d.credit AS d_credit,
+    d.chart_id AS d_chart_id,
+    c.aname AS d_chart_aname,
+    c.ename AS d_chart_ename,
+    d.doctype_id AS d_doctype_id,
+    d.doc_id AS d_doc_id,
+    d.currency_id AS d_currency_id,
+    d.currencyprice AS d_currencyprice,
+    d.jortype_id AS d_jortype_id,
+    d.notes AS d_notes,
+    cc1.aname AS d_cc1_aname,
+    cc1.ename AS d_cc1_ename,
+    d.cc1_id AS d_cc1_id,
+    cc2.aname AS d_cc2_aname,
+    cc2.ename AS d_cc2_ename,
+    d.cc2_id AS d_cc2_id,
+    branch.aname AS d_branch_aname,
+    branch.ename AS d_branch_ename,
+    d.branch_id AS d_branch_id,
+    d.company_id
+   FROM acc.tbl_jord d
+     LEFT JOIN acc.tbl_jor h ON d.jor_id::text = h.id::text
+     LEFT JOIN acc.tbl_chart c ON d.chart_id = c.id::text
+     LEFT JOIN acc.tbl_cc cc1 ON d.cc1_id::text = cc1.id::text
+     LEFT JOIN acc.tbl_cc cc2 ON d.cc2_id::text = cc2.id::text
+     LEFT JOIN grl.tbl_branches branch ON d.branch_id::text = branch.id::text
+  WHERE branch.company_id::text = d.company_id::text
+  ORDER BY d.ctid;
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION acc.fnc_jor_insert(
+	in_id character varying,
+	in_currency_id character varying,
+	in_currencyprice numeric,
+	in_jortype_id text,
+	in_notes text,
+	in_company_id character varying,
+	in_fyear_id character varying,
+	in_branch_id character varying,
+	in_cc1_id character varying,
+	in_cc2_id character varying,
+	in_creationtime timestamp without time zone,
+	in_user_id character varying,
+	in_jord json)
+    RETURNS SETOF acc.viw_jor_select 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+
+declare 
+	on_jorD_id integer;
+	on_servertime timestamp; 
+	on_yyyy text;
+	on_yy text;
+	on_MM text;
+	on_ref text;
+	on_jorRefType text;
+	on_sequ smallint;
+	on_xsequ text;
+	on_audit_id bigint;
+-------------------------------------------
+	i jsonb;
+	on_jorD_debit numeric;
+	on_jorD_credit numeric;
+	on_jorD_chart_id text;
+	on_jorD_notes text;
+	on_jorD_cc1_id text;
+	on_jorD_cc2_id text;
+	on_jorD_branch_id text;
+--------------------------------------------
+	ex_id integer;
+	ex_sqlstate text;
+	ex_colname text; 
+	ex_constraintname text; 
+	ex_datatype text; 
+	ex_msgtext text; 
+	ex_tablename text; 
+	ex_schemaname text; 
+	ex_details text; 
+	ex_hint text; 
+	ex_context text; 
+BEGIN
+	ex_id = (select(select max(id) from grl.tbl_ex) + 1); if ex_id is null then ex_id = 1; end if;
+	on_audit_id = (select(select max(id) from grl.tbl_audit) + 1); if on_audit_id is null then on_audit_id = 1; end if;
+	on_jorD_id = (select(select max(id) from acc.tbl_jorD) + 1); if on_jorD_id is null then on_jorD_id = 1; end if;
+	on_servertime = (select(current_timestamp));
+	
+	on_yyyy = (select extract(year from   in_creationtime));
+	on_MM = (select extract(month from   in_creationtime));
+	on_MM = (select case when (length(on_MM) = 1) then (select concat('0',on_MM)) else on_MM end);
+	on_ref = '000';
+	
+	--on_sequ = (select(select max(sequ) from acc.tbl_jor
+					  --where company_id = in_company_id
+					  --and branch_id = in_branch_id
+					  --and yyyy = on_yyyy
+					  --and mm = on_MM
+					  --and ref = on_ref			   
+					 --) + 1);
+					 
+	on_sequ = (select(select max(sequ) from acc.tbl_jor
+					  WHERE branch_id = in_branch_id	
+					  AND company_id = in_company_id	   
+					 ) + 1);
+					 					 
+	on_sequ = (select case when (on_sequ is NULL) then 1 else on_sequ end);
+	on_xsequ = on_sequ::text;	
+	on_xsequ = repeat('0', 5 - length(on_xsequ)) || on_xsequ;
+		
+	on_yy = (select substring(on_yyyy from 3 for 2));
+	--in_id = (in_branch_id || on_yy || on_MM || on_ref || on_xsequ);
+							  
+	in_id = (in_branch_id || on_yy || on_xsequ);						  
+							  
+	WHILE exists(select * from acc.tbl_cin where postedjor_id = in_id)
+	loop
+		on_sequ = on_sequ + 1;
+		on_xsequ = on_sequ::text;
+		on_xsequ = repeat('0', 5 - length(on_xsequ)) || on_xsequ;
+		in_id = (in_branch_id || on_yy || on_xsequ);
+	end loop;	
+							  
+	WHILE exists(select * from acc.tbl_cout where postedjor_id = in_id)
+	loop
+		on_sequ = on_sequ + 1;
+		on_xsequ = on_sequ::text;
+		on_xsequ = repeat('0', 5 - length(on_xsequ)) || on_xsequ;								  
+		in_id = (in_branch_id || on_yy || on_xsequ);
+	end loop;	
+------------------------------------------------------------------------------------------------------INSERT INTO jor 
+INSERT INTO acc.tbl_jor(
+	id, 
+	sequ, 
+	currency_id, 
+	currencyprice, 
+	jortype_id, 
+	yyyy,
+	MM,
+	ref,
+	notes, 
+	company_id, 
+	fyear_id, 
+	branch_id, 
+	cc1_id, 
+	cc2_id, 
+	creationtime, 
+	createservertime, 
+	createuser_id)
+	VALUES (
+		in_id, 
+		on_sequ, 
+		in_currency_id, 
+		in_currencyprice, 
+		in_jortype_id,
+		on_yyyy,
+		on_MM,
+		on_ref,
+		in_notes,
+		in_company_id, 
+		in_fyear_id, 
+		in_branch_id, 
+		in_cc1_id, 
+		in_cc2_id, 
+		in_creationtime, 
+		on_servertime, 
+		in_user_id);
+------------------------------------------------------------------------------------------------------INSERT INTO jorD 
+FOR i IN SELECT * FROM json_array_elements(in_jord)
+  LOOP
+  	on_jorD_debit := i->>'debit';
+    on_jorD_credit := i->>'credit';
+    on_jorD_chart_id := i->>'chart_id';
+    on_jorD_notes := i->>'notes';
+    on_jorD_cc1_id := i->>'cc1_id';
+    on_jorD_cc2_id := i->>'cc2_id';
+    on_jorD_branch_id := i->>'branch_id';
+	
+ 	on_jorD_debit = (select case when (on_jorD_debit IS NULL) THEN 0 else on_jorD_debit end);
+	on_jorD_credit = (select case when (on_jorD_credit IS NULL) THEN 0 else on_jorD_credit end);
+	on_jorD_notes = (select case when (on_jorD_notes IS NULL OR on_jorD_notes = '') THEN in_notes else on_jorD_notes end);
+	on_jorD_cc1_id = (select case when (on_jorD_cc1_id IS NULL OR on_jorD_cc1_id = '') THEN in_cc1_id else on_jorD_cc1_id end);
+	on_jorD_cc2_id = (select case when (on_jorD_cc2_id IS NULL OR on_jorD_cc2_id = '') THEN in_cc2_id else on_jorD_cc2_id end);
+	on_jorD_branch_id = (select case when (on_jorD_branch_id IS NULL OR on_jorD_branch_id = '') THEN in_branch_id else on_jorD_branch_id end);
+	
+	INSERT INTO acc.tbl_jord(
+	id, 
+	jor_id, 
+	debit, 
+	credit, 
+	chart_id, 
+	currency_id, 
+	currencyprice, 
+	jortype_id, 
+	yyyy,
+	MM,
+	ref,
+	notes, 
+	company_id, 
+	fyear_id, 
+	branch_id, 
+	cc1_id, 
+	cc2_id, 
+	creationtime, 
+	createservertime, 
+	createuser_id )
+	VALUES (
+		on_jorD_id, 
+		in_id, 
+		on_jorD_debit, 
+		on_jorD_credit, 
+		on_jorD_chart_id, 	
+		in_currency_id, 
+		in_currencyprice, 
+		in_jortype_id, 
+		on_yyyy,
+		on_MM,
+		on_ref,
+		on_jorD_notes, 	
+		in_company_id, 
+		in_fyear_id,
+		on_jorD_branch_id, 
+		on_jorD_cc1_id, 
+		on_jorD_cc2_id, 
+		in_creationtime, 
+		on_servertime, 
+		in_user_id);
+		
+	on_jorD_id = on_jorD_id + 1;
+ END LOOP;
+------------------------------------------------------------------------------------------------------INSERT INTO audit
+INSERT INTO grl.tbl_audit(
+	id, eventtime, eventtype_id, doctype_id, doc_id, user_id, company_id)
+	VALUES (on_audit_id, on_servertime, 30, 10, in_id, in_user_id, in_company_id);
+------------------------------------------------------------------------------------------------------Success Return
+RETURN QUERY select * from acc.viw_jor_Select where h_id = in_id;
+------------------------------------------------------------------------------------------------------EX
+EXCEPTION WHEN OTHERS THEN
+	GET STACKED DIAGNOSTICS
+		ex_sqlstate = RETURNED_SQLSTATE,
+		ex_colname = COLUMN_NAME,
+		ex_constraintname = CONSTRAINT_NAME,
+		ex_datatype = PG_DATATYPE_NAME,
+		ex_msgtext = MESSAGE_TEXT,
+		ex_tablename = TABLE_NAME,
+		ex_schemaname = SCHEMA_NAME,
+		ex_details = PG_EXCEPTION_DETAIL,
+		ex_hint = PG_EXCEPTION_HINT,
+		ex_context = PG_EXCEPTION_CONTEXT;
+	DROP TABLE IF EXISTS temp_EX;
+	CREATE TEMP TABLE temp_EX as SELECT * from acc.viw_jor_Select where h_id = '0';
+	INSERT INTO temp_EX(h_notes)VALUES('PostgreSQL'||','|| ex_id || ',' || ex_sqlstate || ',' || ex_msgtext || ',' || ex_context);
+------------------------------------------------------------------------------------------------------INSERT INTO ex
+INSERT INTO grl.tbl_ex(
+id, sqlstate, colname, constraintname, datatype, msgtext, tablename, schemaname, details, hint, context, extime, company_id, branche_id, store_id, user_id, eventtype_id, doc_id)
+VALUES(ex_id, ex_sqlstate, ex_colname, ex_constraintname, ex_datatype, ex_msgtext, ex_tablename, ex_schemaname, ex_details, ex_hint, ex_context, on_servertime, in_company_id, in_branch_id, null, in_user_id,30, in_id);
+------------------------------------------------------------------------------------------------------Faild Return
+return QUERY select * from temp_EX;
+End
+
+$BODY$;
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION acc.fnc_jor_update(
+	in_id character varying,
+	in_currency_id character varying,
+	in_currencyprice numeric,
+	in_jortype_id text,
+	in_notes text,
+	in_company_id character varying,
+	in_fyear_id character varying,
+	in_branch_id character varying,
+	in_cc1_id character varying,
+	in_cc2_id character varying,
+	in_creationtime timestamp without time zone,
+	in_user_id character varying,
+	in_jord json)
+    RETURNS SETOF acc.viw_jor_select 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+
+declare 
+	on_current_edit smallint;
+	on_edit_id integer;
+	on_jorD_id integer;
+	on_servertime timestamp; 
+	on_yyyy text;
+	on_yy text;
+	on_MM text;
+	on_ref text;
+	on_jorRefType text;
+	on_sequ smallint;
+	on_xsequ text;
+	on_audit_id bigint;
+-------------------------------------------
+	i jsonb;
+	on_jorD_debit numeric;
+	on_jorD_credit numeric;
+	on_jorD_chart_id text;
+	on_jorD_notes text;
+	on_jorD_cc1_id text;
+	on_jorD_cc2_id text;
+	on_jorD_branch_id text;
+--------------------------------------------
+	ex_id integer;
+	ex_sqlstate text;
+	ex_colname text; 
+	ex_constraintname text; 
+	ex_datatype text; 
+	ex_msgtext text; 
+	ex_tablename text; 
+	ex_schemaname text; 
+	ex_details text; 
+	ex_hint text; 
+	ex_context text; 
+BEGIN
+	ex_id = (select(select max(id) from grl.tbl_ex) + 1); if ex_id is null then ex_id = 1; end if;
+	on_edit_id = (select(select max(id) from acc.tbl_joredit) + 1); if on_edit_id is null then on_edit_id = 1; end if;
+	on_audit_id = (select(select max(id) from grl.tbl_audit) + 1); if on_audit_id is null then on_audit_id = 1; end if;
+	on_jorD_id = (select(select max(id) from acc.tbl_jorD) + 1); if on_jorD_id is null then on_jorD_id = 1; end if;
+	on_servertime = (select(current_timestamp));
+	on_current_edit = (select(select edit from acc.tbl_jor  WHERE id = in_id AND company_id = in_company_id) + 1);
+	
+	on_yyyy = (select extract(year from   in_creationtime));
+	on_MM = (select extract(month from   in_creationtime));
+	on_MM = (select case when (length(on_MM) = 1) then (select concat('0',on_MM)) else on_MM end);
+	on_ref = '000';
+	
+	on_sequ = (select sequ from acc.tbl_jor WHERE id = in_id AND company_id = in_company_id);					 					 
+------------------------------------------------------------------------------------------------------INSERT INTO joredit
+INSERT INTO acc.tbl_joredit(
+	id, jor_id, sequ, doctype_id, doc_id, currency_id, currencyprice, jortype_id, yyyy, mm, ref, 
+	notes, company_id, fyear_id, branch_id, cc1_id, cc2_id, creationtime, createservertime, editingtime, editservertime, 
+	createuser_id, edituser_id, edit)
+SELECT on_edit_id, id, sequ, doctype_id, doc_id, currency_id, currencyprice, jortype_id, yyyy, mm, ref, 
+	notes, company_id, fyear_id, branch_id, cc1_id, cc2_id, creationtime, createservertime, in_creationtime, on_servertime, 
+	createuser_id, in_user_id, on_current_edit
+	FROM acc.tbl_jor j WHERE j.id = in_id AND j.company_id = in_company_id;
+------------------------------------------------------------------------------------------------------INSERT INTO jordedit
+INSERT INTO acc.tbl_jordedit(
+	jord_id, jor_id, debit, credit, 
+	chart_id, doctype_id, doc_id, currency_id, currencyprice, 
+	jortype_id, yyyy, mm, ref,notes, 
+	company_id, fyear_id, branch_id, cc1_id, cc2_id, 
+	creationtime, createservertime, editingtime, editservertime,createuser_id, edituser_id, edit)
+	
+SELECT id, jor_id, debit, credit, 
+	chart_id, doctype_id, doc_id, currency_id, currencyprice, 
+	jortype_id, yyyy, mm, ref, notes, 
+	company_id, fyear_id, branch_id, cc1_id, cc2_id, 
+	creationtime, createservertime, in_creationtime, on_servertime, createuser_id, in_user_id, on_current_edit
+	FROM acc.tbl_jord jd WHERE jd.jor_id = in_id AND jd.company_id = in_company_id;
+	
+DELETE FROM acc.tbl_jord jd WHERE jd.jor_id = in_id AND jd.company_id = in_company_id;
+DELETE FROM acc.tbl_jor j WHERE j.id = in_id AND j.company_id = in_company_id;
+------------------------------------------------------------------------------------------------------INSERT INTO jor
+INSERT INTO acc.tbl_jor(
+	id, 
+	sequ, 
+	currency_id, 
+	currencyprice, 
+	jortype_id, 
+	yyyy,
+	MM,
+	ref,
+	notes, 
+	company_id, 
+	fyear_id, 
+	branch_id, 
+	cc1_id, 
+	cc2_id, 
+	creationtime, 
+	createservertime, 
+	createuser_id)
+	VALUES (
+		in_id, 
+		on_sequ, 
+		in_currency_id, 
+		in_currencyprice, 
+		in_jortype_id,
+		on_yyyy,
+		on_MM,
+		on_ref,
+		in_notes,
+		in_company_id, 
+		in_fyear_id, 
+		in_branch_id, 
+		in_cc1_id, 
+		in_cc2_id, 
+		in_creationtime, 
+		on_servertime, 
+		in_user_id);
+------------------------------------------------------------------------------------------------------INSERT INTO jorD 
+FOR i IN SELECT * FROM json_array_elements(in_jord)
+  LOOP
+  	on_jorD_debit := i->>'debit';
+    on_jorD_credit := i->>'credit';
+    on_jorD_chart_id := i->>'chart_id';
+    on_jorD_notes := i->>'notes';
+    on_jorD_cc1_id := i->>'cc1_id';
+    on_jorD_cc2_id := i->>'cc2_id';
+    on_jorD_branch_id := i->>'branch_id';
+	
+ 	on_jorD_debit = (select case when (on_jorD_debit IS NULL) THEN 0 else on_jorD_debit end);
+	on_jorD_credit = (select case when (on_jorD_credit IS NULL) THEN 0 else on_jorD_credit end);
+	on_jorD_notes = (select case when (on_jorD_notes IS NULL OR on_jorD_notes = '') THEN in_notes else on_jorD_notes end);
+	on_jorD_cc1_id = (select case when (on_jorD_cc1_id IS NULL OR on_jorD_cc1_id = '') THEN in_cc1_id else on_jorD_cc1_id end);
+	on_jorD_cc2_id = (select case when (on_jorD_cc2_id IS NULL OR on_jorD_cc2_id = '') THEN in_cc2_id else on_jorD_cc2_id end);
+	on_jorD_branch_id = (select case when (on_jorD_branch_id IS NULL OR on_jorD_branch_id = '') THEN in_branch_id else on_jorD_branch_id end);
+	
+	INSERT INTO acc.tbl_jord(
+	id, 
+	jor_id, 
+	debit, 
+	credit, 
+	chart_id, 
+	currency_id, 
+	currencyprice, 
+	jortype_id, 
+	yyyy,
+	MM,
+	ref,
+	notes, 
+	company_id, 
+	fyear_id, 
+	branch_id, 
+	cc1_id, 
+	cc2_id, 
+	creationtime, 
+	createservertime, 
+	createuser_id )
+	VALUES (
+		on_jorD_id, 
+		in_id, 
+		on_jorD_debit, 
+		on_jorD_credit, 
+		on_jorD_chart_id, 	
+		in_currency_id, 
+		in_currencyprice, 
+		in_jortype_id, 
+		on_yyyy,
+		on_MM,
+		on_ref,
+		on_jorD_notes, 	
+		in_company_id, 
+		in_fyear_id,
+		on_jorD_branch_id, 
+		on_jorD_cc1_id, 
+		on_jorD_cc2_id, 
+		in_creationtime, 
+		on_servertime, 
+		in_user_id);
+		
+	on_jorD_id = on_jorD_id + 1;
+ END LOOP;
+------------------------------------------------------------------------------------------------------INSERT INTO audit
+INSERT INTO grl.tbl_audit(
+	id, eventtime, eventtype_id, doctype_id, doc_id, user_id, company_id)
+	VALUES (on_audit_id, on_servertime, 31, 10, in_id, in_user_id, in_company_id);
+------------------------------------------------------------------------------------------------------Success Return
+RETURN QUERY select * from acc.viw_jor_Select where h_id = in_id;
+------------------------------------------------------------------------------------------------------EX
+EXCEPTION WHEN OTHERS THEN
+	GET STACKED DIAGNOSTICS
+		ex_sqlstate = RETURNED_SQLSTATE,
+		ex_colname = COLUMN_NAME,
+		ex_constraintname = CONSTRAINT_NAME,
+		ex_datatype = PG_DATATYPE_NAME,
+		ex_msgtext = MESSAGE_TEXT,
+		ex_tablename = TABLE_NAME,
+		ex_schemaname = SCHEMA_NAME,
+		ex_details = PG_EXCEPTION_DETAIL,
+		ex_hint = PG_EXCEPTION_HINT,
+		ex_context = PG_EXCEPTION_CONTEXT;
+	DROP TABLE IF EXISTS temp_EX;
+	CREATE TEMP TABLE temp_EX as SELECT * from acc.viw_jor_Select where h_id = '0';
+	INSERT INTO temp_EX(h_notes)VALUES('PostgreSQL'||','|| ex_id || ',' || ex_sqlstate || ',' || ex_msgtext || ',' || ex_context);
+------------------------------------------------------------------------------------------------------INSERT INTO ex
+INSERT INTO grl.tbl_ex(
+id, sqlstate, colname, constraintname, datatype, msgtext, tablename, schemaname, details, hint, context, extime, company_id, branche_id, store_id, user_id, eventtype_id, doc_id)
+VALUES(ex_id, ex_sqlstate, ex_colname, ex_constraintname, ex_datatype, ex_msgtext, ex_tablename, ex_schemaname, ex_details, ex_hint, ex_context, on_servertime, in_company_id, in_branch_id, null, in_user_id,31, in_id);
+------------------------------------------------------------------------------------------------------Faild Return
+return QUERY select * from temp_EX;
+End
+
+$BODY$;						  
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION acc.fnc_jor_delete(
+	in_id character varying,
+	in_company_id character varying,
+	in_user_id character varying)
+    RETURNS SETOF acc.viw_jor_select 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+
+declare 
+	on_edit_id integer;
+	on_jorD_id integer;
+	on_servertime timestamp; 
+	on_yyyy text;
+	on_yy text;
+	on_MM text;
+	on_ref text;
+	on_jorRefType text;
+	on_sequ smallint;
+	on_xsequ text;
+	on_audit_id bigint;
+--------------------------------------------
+	ex_id integer;
+	ex_sqlstate text;
+	ex_colname text; 
+	ex_constraintname text; 
+	ex_datatype text; 
+	ex_msgtext text; 
+	ex_tablename text; 
+	ex_schemaname text; 
+	ex_details text; 
+	ex_hint text; 
+	ex_context text; 
+BEGIN
+	ex_id = (select(select max(id) from grl.tbl_ex) + 1); if ex_id is null then ex_id = 1; end if;
+	on_edit_id = (select(select max(id) from acc.tbl_joredit) + 1); if on_edit_id is null then on_edit_id = 1; end if;
+	on_audit_id = (select(select max(id) from grl.tbl_audit) + 1); if on_audit_id is null then on_audit_id = 1; end if;
+	on_servertime = (select(current_timestamp));					 					 
+------------------------------------------------------------------------------------------------------INSERT INTO joredit
+INSERT INTO acc.tbl_joredit(
+	id, jor_id, sequ, doctype_id, doc_id, currency_id, currencyprice, jortype_id, yyyy, mm, ref, 
+	notes, company_id, fyear_id, branch_id, cc1_id, cc2_id, creationtime, createservertime, editingtime, editservertime, 
+	createuser_id, edituser_id, edit, delete)
+SELECT on_edit_id, id, sequ, doctype_id, doc_id, currency_id, currencyprice, jortype_id, yyyy, mm, ref, 
+	notes, company_id, fyear_id, branch_id, cc1_id, cc2_id, creationtime, createservertime, on_servertime, on_servertime, 
+	createuser_id, in_user_id, edit, 1
+	FROM acc.tbl_jor j WHERE j.id = in_id AND j.company_id = in_company_id;
+	
+------------------------------------------------------------------------------------------------------INSERT INTO jordedit
+INSERT INTO acc.tbl_jordedit(
+	jord_id, jor_id, debit, credit, 
+	chart_id, doctype_id, doc_id, currency_id, currencyprice, 
+	jortype_id, yyyy, mm, ref,notes, 
+	company_id, fyear_id, branch_id, cc1_id, cc2_id, 
+	creationtime, createservertime, editingtime, editservertime,createuser_id, edituser_id, edit, delete)
+	
+SELECT id, jor_id, debit, credit, 
+	chart_id, doctype_id, doc_id, currency_id, currencyprice, 
+	jortype_id, yyyy, mm, ref, notes, 
+	company_id, fyear_id, branch_id, cc1_id, cc2_id, 
+	creationtime, createservertime, on_servertime, on_servertime, createuser_id, in_user_id, edit, 1
+	FROM acc.tbl_jord jd WHERE jd.jor_id = in_id AND jd.company_id = in_company_id;
+	
+	
+DELETE FROM acc.tbl_jord jd WHERE jd.jor_id = in_id AND jd.company_id = in_company_id;
+DELETE FROM acc.tbl_jor j WHERE j.id = in_id AND j.company_id = in_company_id;
+------------------------------------------------------------------------------------------------------INSERT INTO audit
+INSERT INTO grl.tbl_audit(
+	id, eventtime, eventtype_id, doctype_id, doc_id, user_id, company_id)
+	VALUES (on_audit_id, on_servertime, 32, 10, in_id, in_user_id, in_company_id);
+------------------------------------------------------------------------------------------------------Success Return
+RETURN QUERY select * from acc.viw_jor_Select where h_id = in_id;
+------------------------------------------------------------------------------------------------------EX
+EXCEPTION WHEN OTHERS THEN
+	GET STACKED DIAGNOSTICS
+		ex_sqlstate = RETURNED_SQLSTATE,
+		ex_colname = COLUMN_NAME,
+		ex_constraintname = CONSTRAINT_NAME,
+		ex_datatype = PG_DATATYPE_NAME,
+		ex_msgtext = MESSAGE_TEXT,
+		ex_tablename = TABLE_NAME,
+		ex_schemaname = SCHEMA_NAME,
+		ex_details = PG_EXCEPTION_DETAIL,
+		ex_hint = PG_EXCEPTION_HINT,
+		ex_context = PG_EXCEPTION_CONTEXT;
+	DROP TABLE IF EXISTS temp_EX;
+	CREATE TEMP TABLE temp_EX as SELECT * from acc.viw_jor_Select where h_id = '0';
+	INSERT INTO temp_EX(h_notes)VALUES('PostgreSQL'||','|| ex_id || ',' || ex_sqlstate || ',' || ex_msgtext || ',' || ex_context);
+------------------------------------------------------------------------------------------------------INSERT INTO ex
+INSERT INTO grl.tbl_ex(
+id, sqlstate, colname, constraintname, datatype, msgtext, tablename, schemaname, details, hint, context, extime, company_id, branche_id, store_id, user_id, eventtype_id, doc_id)
+VALUES(ex_id, ex_sqlstate, ex_colname, ex_constraintname, ex_datatype, ex_msgtext, ex_tablename, ex_schemaname, ex_details, ex_hint, ex_context, on_servertime, in_company_id, null, null, in_user_id,32, in_id);
+------------------------------------------------------------------------------------------------------Faild Return
+return QUERY select * from temp_EX;
+End
+
+$BODY$;												
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION acc.fnc_jor_select(
+	in_id character varying,
+	in_sequ integer,
+	in_branch_id character varying,
+	in_company_id character varying,
+	in_selecttype text)
+    RETURNS SETOF acc.viw_jor_select 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+
+declare 
+
+BEGIN
+------------------------------------------------------------------------------------------------------Select
+IF in_selecttype = 'Select' THEN 
+
+RETURN QUERY SELECT * FROM acc.viw_jor_Select WHERE h_id = in_id AND h_company_id = in_company_id;
+
+END IF;
+------------------------------------------------------------------------------------------------------Search
+IF in_selecttype = 'Search' THEN 
+
+RETURN QUERY SELECT * FROM acc.viw_jor_Select WHERE h_sequ = in_sequ AND h_branch_id = in_branch_id AND h_company_id = in_company_id;
+
+END IF;
+------------------------------------------------------------------------------------------------------First
+IF in_selecttype = 'First' THEN 
+
+in_id = (SELECT h_id FROM acc.viw_jor_Select WHERE h_branch_id = in_branch_id AND h_company_id = in_company_id ORDER BY h_sequ ASC LIMIT 1);
+RETURN QUERY SELECT * FROM acc.viw_jor_Select WHERE h_id = in_id AND h_company_id = in_company_id;
+
+END IF;
+------------------------------------------------------------------------------------------------------Prev
+IF in_selecttype = 'Prev' THEN 
+
+in_sequ = (SELECT h_sequ FROM acc.viw_jor_Select WHERE h_id = in_id AND h_company_id = in_company_id LIMIT 1);
+in_id = (SELECT h_id FROM acc.viw_jor_Select WHERE h_sequ < in_sequ AND h_branch_id = in_branch_id AND h_company_id = in_company_id ORDER BY h_sequ Desc LIMIT 1);
+RETURN QUERY SELECT * FROM acc.viw_jor_Select WHERE h_id = in_id AND h_company_id = in_company_id;
+
+END IF;
+------------------------------------------------------------------------------------------------------Next
+IF in_selecttype = 'Next' THEN 
+
+in_sequ = (SELECT h_sequ FROM acc.viw_jor_Select WHERE h_id = in_id AND h_company_id = in_company_id LIMIT 1);
+in_id = (SELECT h_id FROM acc.viw_jor_Select WHERE h_sequ > in_sequ AND h_branch_id = in_branch_id AND h_company_id = in_company_id ORDER BY h_sequ ASC LIMIT 1);
+RETURN QUERY SELECT * FROM acc.viw_jor_Select WHERE h_id = in_id AND h_company_id = in_company_id;
+
+END IF;
+------------------------------------------------------------------------------------------------------Last
+IF in_selecttype = 'Last' THEN 
+
+in_id = (SELECT h_id FROM acc.viw_jor_Select WHERE h_branch_id = in_branch_id AND h_company_id = in_company_id ORDER BY h_sequ Desc LIMIT 1);
+RETURN QUERY SELECT * FROM acc.viw_jor_Select WHERE h_id = in_id AND h_company_id = in_company_id;
+
+END IF;
+
+End
+
+$BODY$;			
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION acc.fnc_cin_post(
+	in_cin_id character varying,
+	in_posttime timestamp without time zone,
+	in_user_id character varying,
+	in_company_id character varying)
+    RETURNS SETOF acc.viw_cin_select 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+
+declare 
+	on_jor_id character varying;
+	on_jorD_id integer;
+	
+	on_doctype_id smallint;
+	on_currency_id smallint;
+	on_currencyprice numeric; 
+	on_jortype_id smallint;
+	
+	on_notes text; 
+	on_fyear_id text; 
+	on_branch_id text; 
+	on_cc1_id text;  
+	on_cc2_id text;  
+	on_creationtime timestamp;  
+-------------------------------------------------------------
+rec   record;
+-------------------------------------------------------------
+	on_servertime timestamp; 
+	on_yyyy text;
+	on_yy text;
+	on_MM text;
+	on_ref text;
+	on_jorRefType text;
+	on_sequ smallint;
+	on_xsequ text;
+	on_audit_id bigint;
+-------------------------------------------
+	i jsonb;
+	on_jorD_debit numeric;
+	on_jorD_credit numeric;
+	on_jorD_chart_id text;
+	on_jorD_notes text;
+	on_jorD_cc1_id text;
+	on_jorD_cc2_id text;
+	on_jorD_branch_id text;
+--------------------------------------------
+	ex_id integer;
+	ex_sqlstate text;
+	ex_colname text; 
+	ex_constraintname text; 
+	ex_datatype text; 
+	ex_msgtext text; 
+	ex_tablename text; 
+	ex_schemaname text; 
+	ex_details text; 
+	ex_hint text; 
+	ex_context text; 
+BEGIN
+	ex_id = (select(select max(id) from grl.tbl_ex) + 1); if ex_id is null then ex_id = 1; end if;
+	
+	DROP TABLE IF EXISTS temp_cin;
+	CREATE TEMP TABLE temp_cin AS SELECT * FROM acc.viw_cin_select WHERE h_id = in_cin_id AND h_company_id = in_company_id;
+	
+	on_doctype_id = 19;
+	on_creationtime = (select h_creationtime from temp_cin limit 1);
+	on_branch_id = (select h_branch_id from temp_cin limit 1);
+	on_currency_id = (select id from grl.tbl_currencies order by sequ asc limit 1);
+	on_currencyprice = (select price from grl.tbl_currencies order by sequ asc limit 1); 
+	on_jortype_id = 9;
+	on_notes = (select h_notes from temp_cin limit 1); 
+	on_fyear_id = (select h_fyear_id from temp_cin limit 1); 
+	on_cc1_id = (select h_cc1_id from temp_cin limit 1);  
+	on_cc2_id = (select h_cc2_id from temp_cin limit 1);  
+
+	on_audit_id = (select(select max(id) from grl.tbl_audit) + 1); if on_audit_id is null then on_audit_id = 1; end if;
+	on_jorD_id = (select(select max(id) from acc.tbl_jorD WHERE company_id = in_company_id) + 1); if on_jorD_id is null then on_jorD_id = 1; end if;
+	on_servertime = (select(current_timestamp));
+	
+	on_yyyy = (select extract(year from   on_creationtime));
+	on_MM = (select extract(month from   on_creationtime));
+	on_MM = (select case when (length(on_MM) = 1) then (select concat('0',on_MM)) else on_MM end);
+	on_ref = 'pin';
+					 
+	on_sequ = (select(select max(sequ) from acc.tbl_jor
+					  WHERE branch_id = on_branch_id	
+					  AND company_id = in_company_id	   
+					 ) + 1);
+					 					 
+	on_sequ = (select case when (on_sequ is NULL) then 1 else on_sequ end);
+	on_xsequ = on_sequ::text;
+	
+	WHILE (length(on_xsequ) < 5)
+		loop
+			on_xsequ = (select concat('0',on_xsequ));
+		end loop;
+		
+	on_yy = (select substring(on_yyyy from 3 for 2));
+	--in_id = (in_branch_id || on_yy || on_MM || on_ref || on_xsequ);
+	
+	on_jor_id = (select postedjor_id from acc.tbl_cin where id = in_cin_id);
+
+	if(on_jor_id is not null)
+	THEN
+		on_sequ = CAST (substr(on_jor_id, 6) AS int);
+	ELSE
+			on_jor_id = (on_branch_id || on_yy || on_xsequ);
+			
+			WHILE exists(select 1 from acc.tbl_cin cin, acc.tbl_cout cout where cin.postedjor_id = on_jor_id OR cout.postedjor_id = on_jor_id)
+			loop
+				on_sequ = on_sequ + 1;
+				on_xsequ = on_sequ::text;
+				on_xsequ = repeat('0', 5 - length(on_xsequ)) || on_xsequ;
+				on_jor_id = (on_branch_id || on_yy || on_xsequ);
+			end loop;								  
+	END IF;
+------------------------------------------------------------------------------------------------------INSERT INTO jor 
+INSERT INTO acc.tbl_jor(
+	id, 
+	sequ,
+	doctype_id,
+	doc_id,
+	currency_id, 
+	currencyprice, 
+	jortype_id, 
+	yyyy,
+	MM,
+	ref,
+	notes, 
+	company_id, 
+	fyear_id, 
+	branch_id, 
+	cc1_id, 
+	cc2_id, 
+	creationtime, 
+	createservertime, 
+	createuser_id)
+	VALUES (
+		on_jor_id, 
+		on_sequ, 
+		on_doctype_id,
+		in_cin_id,
+		on_currency_id, 
+		on_currencyprice, 
+		on_jortype_id,
+		on_yyyy,
+		on_MM,
+		on_ref,
+		on_notes,
+		in_company_id, 
+		on_fyear_id, 
+		on_branch_id, 
+		on_cc1_id, 
+		on_cc2_id, 
+		on_creationtime, 
+		on_servertime, 
+		in_user_id);
+------------------------------------------------------------------------------------------------------INSERT INTO jorD 		
+FOR rec IN SELECT * FROM acc.viw_cin_select WHERE h_id = in_cin_id AND h_company_id = in_company_id
+    LOOP
+        INSERT INTO acc.tbl_jord(id, jor_id, debit, credit, chart_id, doctype_id, doc_id, currency_id, currencyprice, jortype_id, yyyy, MM, ref, notes, 
+								 company_id, fyear_id, branch_id, cc1_id, cc2_id, creationtime, createservertime, createuser_id )
+		VALUES (
+			on_jorD_id, on_jor_id, rec.d_amount, 0, rec.d_chart_cin_id, on_doctype_id, in_cin_id, rec.d_currency_id, rec.d_currency_price, on_jortype_id, on_yyyy, on_MM, on_ref,
+			rec.d_notes, in_company_id, on_fyear_id, on_branch_id, on_cc1_id, on_cc2_id, on_creationtime, on_servertime, in_user_id);		
+			on_jorD_id = on_jorD_id + 1;
+							  
+		INSERT INTO acc.tbl_jord(id, jor_id, debit, credit, chart_id, doctype_id, doc_id, currency_id, currencyprice, jortype_id, yyyy, MM, ref, notes, 
+								 company_id, fyear_id, branch_id, cc1_id, cc2_id, creationtime, createservertime, createuser_id )
+		VALUES (
+			on_jorD_id, on_jor_id, 0, rec.d_amount, rec.d_chart_cout_id, on_doctype_id, in_cin_id, rec.d_currency_id, rec.d_currency_price, on_jortype_id, on_yyyy, on_MM, on_ref,
+			rec.d_notes, in_company_id, on_fyear_id, on_branch_id, on_cc1_id, on_cc2_id, on_creationtime, on_servertime, in_user_id);		
+			on_jorD_id = on_jorD_id + 1;
+    END LOOP;	 
+------------------------------------------------------------------------------------------------------UPDATE acc.tbl_cin & cind
+	UPDATE acc.tbl_cin SET posted = '1', jor_id = on_jor_id, postedjor_id = on_jor_id  WHERE id = in_cin_id AND company_id = in_company_id;
+	UPDATE acc.tbl_cind SET posted = '1', jor_id = on_jor_id WHERE cin_id = in_cin_id AND company_id = in_company_id;
+------------------------------------------------------------------------------------------------------INSERT INTO audit
+INSERT INTO grl.tbl_audit(
+	id, eventtime, eventtype_id, doctype_id, doc_id, user_id, company_id)
+	VALUES (on_audit_id, on_servertime, 63, on_doctype_id, in_cin_id, in_user_id, in_company_id);
+------------------------------------------------------------------------------------------------------Success Return
+RETURN QUERY select * from acc.viw_cin_Select where h_id = in_cin_id;
+------------------------------------------------------------------------------------------------------EX
+EXCEPTION WHEN OTHERS THEN
+	GET STACKED DIAGNOSTICS
+		ex_sqlstate = RETURNED_SQLSTATE,
+		ex_colname = COLUMN_NAME,
+		ex_constraintname = CONSTRAINT_NAME,
+		ex_datatype = PG_DATATYPE_NAME,
+		ex_msgtext = MESSAGE_TEXT,
+		ex_tablename = TABLE_NAME,
+		ex_schemaname = SCHEMA_NAME,
+		ex_details = PG_EXCEPTION_DETAIL,
+		ex_hint = PG_EXCEPTION_HINT,
+		ex_context = PG_EXCEPTION_CONTEXT;
+	DROP TABLE IF EXISTS temp_EX;
+	CREATE TEMP TABLE temp_EX as SELECT * from acc.viw_cin_Select where h_id = '0';
+	INSERT INTO temp_EX(h_notes)VALUES('PostgreSQL'||','|| ex_id || ',' || ex_sqlstate || ',' || ex_msgtext || ',' || ex_context);
+------------------------------------------------------------------------------------------------------INSERT INTO ex
+INSERT INTO grl.tbl_ex(
+id, sqlstate, colname, constraintname, datatype, msgtext, tablename, schemaname, details, hint, context, extime, company_id, branche_id, store_id, user_id, eventtype_id, doctype_id, doc_id)
+VALUES(ex_id, ex_sqlstate, ex_colname, ex_constraintname, ex_datatype, ex_msgtext, ex_tablename, ex_schemaname, ex_details, ex_hint, ex_context, on_servertime, in_company_id, on_branch_id, null, in_user_id,63, on_doctype_id, in_cin_id);
+------------------------------------------------------------------------------------------------------Faild Return
+return QUERY select * from temp_EX;
+End
+
+$BODY$;
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION acc.fnc_cin_postcancel(
+	in_cin_id character varying,
+	in_time timestamp without time zone,
+	in_user_id character varying,
+	in_company_id character varying)
+    RETURNS SETOF acc.viw_cin_Select 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+
+declare 
+	on_doctype_id smallint;
+	on_branch_id text; 
+	on_audit_id bigint;
+    on_servertime timestamp;
+--------------------------------------------
+	ex_id integer;
+	ex_sqlstate text;
+	ex_colname text; 
+	ex_constraintname text; 
+	ex_datatype text; 
+	ex_msgtext text; 
+	ex_tablename text; 
+	ex_schemaname text; 
+	ex_details text; 
+	ex_hint text; 
+	ex_context text; 
+BEGIN
+	ex_id = (select(select max(id) from grl.tbl_ex) + 1); if ex_id is null then ex_id = 1; end if;	
+	on_doctype_id = '19';
+	on_branch_id = (select h_branch_id FROM acc.viw_cin_select WHERE h_id = in_cin_id AND h_company_id = in_company_id limit 1);
+	on_audit_id = (select(select max(id) from grl.tbl_audit) + 1); if on_audit_id is null then on_audit_id = 1; end if;
+	on_servertime = (select(current_timestamp));
+------------------------------------------------------------------------------------------------------UPDATE acc.tbl_cin & cind
+	UPDATE acc.tbl_cind SET posted = 'false', jor_id = null WHERE cin_id = in_cin_id AND company_id = in_company_id;					
+	UPDATE acc.tbl_cin SET posted = 'false', jor_id = null WHERE id = in_cin_id AND company_id = in_company_id;	
+------------------------------------------------------------------------------------------------------INSERT INTO jorD 		
+ 	DELETE FROM acc.tbl_jord WHERE doc_id = in_cin_id AND doctype_id = on_doctype_id AND company_id = in_company_id;
+------------------------------------------------------------------------------------------------------DELETE FROM jor 
+	DELETE FROM acc.tbl_jor WHERE doc_id = in_cin_id AND doctype_id = on_doctype_id AND company_id = in_company_id;	
+------------------------------------------------------------------------------------------------------INSERT INTO audit
+INSERT INTO grl.tbl_audit(
+	id, eventtime, eventtype_id, doctype_id, doc_id, user_id, company_id)
+	VALUES (on_audit_id, on_servertime, 64, on_doctype_id, in_cin_id, in_user_id, in_company_id);
+------------------------------------------------------------------------------------------------------Success Return
+RETURN QUERY select * from acc.viw_cin_Select where h_id = in_cin_id;
+------------------------------------------------------------------------------------------------------EX
+EXCEPTION WHEN OTHERS THEN
+	GET STACKED DIAGNOSTICS
+		ex_sqlstate = RETURNED_SQLSTATE,
+		ex_colname = COLUMN_NAME,
+		ex_constraintname = CONSTRAINT_NAME,
+		ex_datatype = PG_DATATYPE_NAME,
+		ex_msgtext = MESSAGE_TEXT,
+		ex_tablename = TABLE_NAME,
+		ex_schemaname = SCHEMA_NAME,
+		ex_details = PG_EXCEPTION_DETAIL,
+		ex_hint = PG_EXCEPTION_HINT,
+		ex_context = PG_EXCEPTION_CONTEXT;
+	DROP TABLE IF EXISTS temp_EX;
+	CREATE TEMP TABLE temp_EX as SELECT * from acc.viw_cin_Select where h_id = '0';
+	INSERT INTO temp_EX(h_notes)VALUES('PostgreSQL'||','|| ex_id || ',' || ex_sqlstate || ',' || ex_msgtext || ',' || ex_context);
+------------------------------------------------------------------------------------------------------INSERT INTO ex
+INSERT INTO grl.tbl_ex(
+id, sqlstate, colname, constraintname, datatype, msgtext, tablename, schemaname, details, hint, context, extime, company_id, branche_id, store_id, user_id, eventtype_id, doctype_id, doc_id)
+VALUES(ex_id, ex_sqlstate, ex_colname, ex_constraintname, ex_datatype, ex_msgtext, ex_tablename, ex_schemaname, ex_details, ex_hint, ex_context, on_servertime, in_company_id, on_branch_id, null, in_user_id,64, on_doctype_id, in_cin_id);
+------------------------------------------------------------------------------------------------------Faild Return
+return QUERY select * from temp_EX;
+End
+
+$BODY$;
+------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION acc.fnc_cout_post(
+	in_cout_id character varying,
+	in_posttime timestamp without time zone,
+	in_user_id character varying,
+	in_company_id character varying)
+    RETURNS SETOF acc.viw_cout_select 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+
+declare 
+	on_jor_id character varying;
+	on_jorD_id integer;
+	
+	on_doctype_id smallint;
+	on_currency_id smallint;
+	on_currencyprice numeric; 
+	on_jortype_id smallint;
+	
+	on_notes text; 
+	on_fyear_id text; 
+	on_branch_id text; 
+	on_cc1_id text;  
+	on_cc2_id text;  
+	on_creationtime timestamp;  
+-------------------------------------------------------------
+rec   record;
+-------------------------------------------------------------
+	on_servertime timestamp; 
+	on_yyyy text;
+	on_yy text;
+	on_MM text;
+	on_ref text;
+	on_jorRefType text;
+	on_sequ smallint;
+	on_xsequ text;
+	on_audit_id bigint;
+-------------------------------------------
+	i jsonb;
+	on_jorD_debit numeric;
+	on_jorD_credit numeric;
+	on_jorD_chart_id text;
+	on_jorD_notes text;
+	on_jorD_cc1_id text;
+	on_jorD_cc2_id text;
+	on_jorD_branch_id text;
+--------------------------------------------
+	ex_id integer;
+	ex_sqlstate text;
+	ex_colname text; 
+	ex_constraintname text; 
+	ex_datatype text; 
+	ex_msgtext text; 
+	ex_tablename text; 
+	ex_schemaname text; 
+	ex_details text; 
+	ex_hint text; 
+	ex_context text; 
+BEGIN
+	ex_id = (select(select max(id) from grl.tbl_ex) + 1); if ex_id is null then ex_id = 1; end if;
+	
+	DROP TABLE IF EXISTS temp_cout;
+	CREATE TEMP TABLE temp_cout AS SELECT * FROM acc.viw_cout_select WHERE h_id = in_cout_id AND h_company_id = in_company_id;
+	
+	on_doctype_id = 20;
+	on_creationtime = (select h_creationtime from temp_cout limit 1);
+	on_branch_id = (select h_branch_id from temp_cout limit 1);
+	on_currency_id = (select id from grl.tbl_currencies order by sequ asc limit 1);
+	on_currencyprice = (select price from grl.tbl_currencies order by sequ asc limit 1); 
+	on_jortype_id = 10;
+	on_notes = (select h_notes from temp_cout limit 1); 
+	on_fyear_id = (select h_fyear_id from temp_cout limit 1); 
+	on_cc1_id = (select h_cc1_id from temp_cout limit 1);  
+	on_cc2_id = (select h_cc2_id from temp_cout limit 1);  
+
+	on_audit_id = (select(select max(id) from grl.tbl_audit) + 1); if on_audit_id is null then on_audit_id = 1; end if;
+	on_jorD_id = (select(select max(id) from acc.tbl_jorD WHERE company_id = in_company_id) + 1); if on_jorD_id is null then on_jorD_id = 1; end if;
+	on_servertime = (select(current_timestamp));
+	
+	on_yyyy = (select extract(year from   on_creationtime));
+	on_MM = (select extract(month from   on_creationtime));
+	on_MM = (select case when (length(on_MM) = 1) then (select concat('0',on_MM)) else on_MM end);
+	on_ref = 'put';
+					 
+	on_sequ = (select(select max(sequ) from acc.tbl_jor
+					  WHERE branch_id = on_branch_id	
+					  AND company_id = in_company_id	   
+					 ) + 1);
+					 					 
+	on_sequ = (select case when (on_sequ is NULL) then 1 else on_sequ end);
+	on_xsequ = on_sequ::text;
+	
+	WHILE (length(on_xsequ) < 5)
+		loop
+			on_xsequ = (select concat('0',on_xsequ));
+		end loop;
+		
+	on_yy = (select substring(on_yyyy from 3 for 2));
+	--in_id = (in_branch_id || on_yy || on_MM || on_ref || on_xsequ);
+	
+	on_jor_id = (select postedjor_id from acc.tbl_cout where id = in_cout_id);
+
+	if(on_jor_id is not null)
+	THEN
+		on_sequ = CAST (substr(on_jor_id, 6) AS int);
+	ELSE
+			on_jor_id = (on_branch_id || on_yy || on_xsequ);
+							  
+			WHILE exists(select 1 from acc.tbl_cin cin, acc.tbl_cout cout where cin.postedjor_id = on_jor_id OR cout.postedjor_id = on_jor_id)
+			loop
+				on_sequ = on_sequ + 1;
+				on_xsequ = on_sequ::text;
+				on_xsequ = repeat('0', 5 - length(on_xsequ)) || on_xsequ;
+				on_jor_id = (on_branch_id || on_yy || on_xsequ);
+			end loop;	
+							  
+			--WHILE exists(select * from acc.tbl_cout where postedjor_id = on_jor_id)
+			--loop
+				--on_sequ = on_sequ + 1;
+				--on_xsequ = on_sequ::text;
+				--on_xsequ = repeat('0', 5 - length(on_xsequ)) || on_xsequ;								  
+				--on_jor_id = (on_branch_id || on_yy || on_xsequ);
+			--end loop;	
+	END IF;
+------------------------------------------------------------------------------------------------------INSERT INTO jor 
+INSERT INTO acc.tbl_jor(
+	id, 
+	sequ,
+	doctype_id,
+	doc_id,
+	currency_id, 
+	currencyprice, 
+	jortype_id, 
+	yyyy,
+	MM,
+	ref,
+	notes, 
+	company_id, 
+	fyear_id, 
+	branch_id, 
+	cc1_id, 
+	cc2_id, 
+	creationtime, 
+	createservertime, 
+	createuser_id)
+	VALUES (
+		on_jor_id, 
+		on_sequ, 
+		on_doctype_id,
+		in_cout_id,
+		on_currency_id, 
+		on_currencyprice, 
+		on_jortype_id,
+		on_yyyy,
+		on_MM,
+		on_ref,
+		on_notes,
+		in_company_id, 
+		on_fyear_id, 
+		on_branch_id, 
+		on_cc1_id, 
+		on_cc2_id, 
+		on_creationtime, 
+		on_servertime, 
+		in_user_id);
+------------------------------------------------------------------------------------------------------INSERT INTO jorD 		
+FOR rec IN SELECT * FROM acc.viw_cout_select WHERE h_id = in_cout_id AND h_company_id = in_company_id
+    LOOP
+        INSERT INTO acc.tbl_jord(id, jor_id, debit, credit, chart_id, doctype_id, doc_id, currency_id, currencyprice, jortype_id, yyyy, MM, ref, notes, 
+								 company_id, fyear_id, branch_id, cc1_id, cc2_id, creationtime, createservertime, createuser_id )
+		VALUES (
+			on_jorD_id, on_jor_id, rec.d_amount, 0, rec.d_chart_cin_id, on_doctype_id, in_cout_id, rec.d_currency_id, rec.d_currency_price, on_jortype_id, on_yyyy, on_MM, on_ref,
+			rec.d_notes, in_company_id, on_fyear_id, on_branch_id, on_cc1_id, on_cc2_id, on_creationtime, on_servertime, in_user_id);		
+			on_jorD_id = on_jorD_id + 1;
+							  
+		INSERT INTO acc.tbl_jord(id, jor_id, debit, credit, chart_id, doctype_id, doc_id, currency_id, currencyprice, jortype_id, yyyy, MM, ref, notes, 
+								 company_id, fyear_id, branch_id, cc1_id, cc2_id, creationtime, createservertime, createuser_id )
+		VALUES (
+			on_jorD_id, on_jor_id, 0, rec.d_amount, rec.d_chart_cout_id, on_doctype_id, in_cout_id, rec.d_currency_id, rec.d_currency_price, on_jortype_id, on_yyyy, on_MM, on_ref,
+			rec.d_notes, in_company_id, on_fyear_id, on_branch_id, on_cc1_id, on_cc2_id, on_creationtime, on_servertime, in_user_id);		
+			on_jorD_id = on_jorD_id + 1;
+    END LOOP;	 
+------------------------------------------------------------------------------------------------------UPDATE acc.tbl_cout & coutd
+	UPDATE acc.tbl_cout SET posted = '1', jor_id = on_jor_id, postedjor_id = on_jor_id  WHERE id = in_cout_id AND company_id = in_company_id;
+	UPDATE acc.tbl_coutd SET posted = '1', jor_id = on_jor_id WHERE cout_id = in_cout_id AND company_id = in_company_id;
+------------------------------------------------------------------------------------------------------INSERT INTO audit
+INSERT INTO grl.tbl_audit(
+	id, eventtime, eventtype_id, doctype_id, doc_id, user_id, company_id)
+	VALUES (on_audit_id, on_servertime, 68, on_doctype_id, in_cout_id, in_user_id, in_company_id);
+------------------------------------------------------------------------------------------------------Success Return
+RETURN QUERY select * from acc.viw_cout_Select where h_id = in_cout_id;
+------------------------------------------------------------------------------------------------------EX
+EXCEPTION WHEN OTHERS THEN
+	GET STACKED DIAGNOSTICS
+		ex_sqlstate = RETURNED_SQLSTATE,
+		ex_colname = COLUMN_NAME,
+		ex_constraintname = CONSTRAINT_NAME,
+		ex_datatype = PG_DATATYPE_NAME,
+		ex_msgtext = MESSAGE_TEXT,
+		ex_tablename = TABLE_NAME,
+		ex_schemaname = SCHEMA_NAME,
+		ex_details = PG_EXCEPTION_DETAIL,
+		ex_hint = PG_EXCEPTION_HINT,
+		ex_context = PG_EXCEPTION_CONTEXT;
+	DROP TABLE IF EXISTS temp_EX;
+	CREATE TEMP TABLE temp_EX as SELECT * from acc.viw_cout_Select where h_id = '0';
+	INSERT INTO temp_EX(h_notes)VALUES('PostgreSQL'||','|| ex_id || ',' || ex_sqlstate || ',' || ex_msgtext || ',' || ex_context);
+------------------------------------------------------------------------------------------------------INSERT INTO ex
+INSERT INTO grl.tbl_ex(
+id, sqlstate, colname, constraintname, datatype, msgtext, tablename, schemaname, details, hint, context, extime, company_id, branche_id, store_id, user_id, eventtype_id, doctype_id, doc_id)
+VALUES(ex_id, ex_sqlstate, ex_colname, ex_constraintname, ex_datatype, ex_msgtext, ex_tablename, ex_schemaname, ex_details, ex_hint, ex_context, on_servertime, in_company_id, on_branch_id, null, in_user_id,68, on_doctype_id, in_cout_id);
+------------------------------------------------------------------------------------------------------Faild Return
+return QUERY select * from temp_EX;
+End
+
+$BODY$;
+------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION acc.fnc_cout_postcancel(
+	in_cout_id character varying,
+	in_time timestamp without time zone,
+	in_user_id character varying,
+	in_company_id character varying)
+    RETURNS SETOF acc.viw_cout_Select 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+
+declare 
+	on_doctype_id smallint;
+	on_branch_id text; 
+	on_audit_id bigint;
+    on_servertime timestamp;
+--------------------------------------------
+	ex_id integer;
+	ex_sqlstate text;
+	ex_colname text; 
+	ex_constraintname text; 
+	ex_datatype text; 
+	ex_msgtext text; 
+	ex_tablename text; 
+	ex_schemaname text; 
+	ex_details text; 
+	ex_hint text; 
+	ex_context text; 
+BEGIN
+	ex_id = (select(select max(id) from grl.tbl_ex) + 1); if ex_id is null then ex_id = 1; end if;	
+	on_doctype_id = '20';
+	on_branch_id = (select h_branch_id FROM acc.viw_cout_select WHERE h_id = in_cout_id AND h_company_id = in_company_id limit 1);
+	on_audit_id = (select(select max(id) from grl.tbl_audit) + 1); if on_audit_id is null then on_audit_id = 1; end if;
+	on_servertime = (select(current_timestamp));
+------------------------------------------------------------------------------------------------------UPDATE acc.tbl_cout & coutd
+	UPDATE acc.tbl_coutd SET posted = 'false', jor_id = null WHERE cout_id = in_cout_id AND company_id = in_company_id;					
+	UPDATE acc.tbl_cout SET posted = 'false', jor_id = null WHERE id = in_cout_id AND company_id = in_company_id;	
+------------------------------------------------------------------------------------------------------INSERT INTO jorD 		
+ 	DELETE FROM acc.tbl_jord WHERE doc_id = in_cout_id AND doctype_id = on_doctype_id AND company_id = in_company_id;
+------------------------------------------------------------------------------------------------------DELETE FROM jor 
+	DELETE FROM acc.tbl_jor WHERE doc_id = in_cout_id AND doctype_id = on_doctype_id AND company_id = in_company_id;	
+------------------------------------------------------------------------------------------------------INSERT INTO audit
+INSERT INTO grl.tbl_audit(
+	id, eventtime, eventtype_id, doctype_id, doc_id, user_id, company_id)
+	VALUES (on_audit_id, on_servertime, 69, on_doctype_id, in_cout_id, in_user_id, in_company_id);
+------------------------------------------------------------------------------------------------------Success Return
+RETURN QUERY select * from acc.viw_cout_Select where h_id = in_cout_id;
+------------------------------------------------------------------------------------------------------EX
+EXCEPTION WHEN OTHERS THEN
+	GET STACKED DIAGNOSTICS
+		ex_sqlstate = RETURNED_SQLSTATE,
+		ex_colname = COLUMN_NAME,
+		ex_constraintname = CONSTRAINT_NAME,
+		ex_datatype = PG_DATATYPE_NAME,
+		ex_msgtext = MESSAGE_TEXT,
+		ex_tablename = TABLE_NAME,
+		ex_schemaname = SCHEMA_NAME,
+		ex_details = PG_EXCEPTION_DETAIL,
+		ex_hint = PG_EXCEPTION_HINT,
+		ex_context = PG_EXCEPTION_CONTEXT;
+	DROP TABLE IF EXISTS temp_EX;
+	CREATE TEMP TABLE temp_EX as SELECT * from acc.viw_cout_Select where h_id = '0';
+	INSERT INTO temp_EX(h_notes)VALUES('PostgreSQL'||','|| ex_id || ',' || ex_sqlstate || ',' || ex_msgtext || ',' || ex_context);
+------------------------------------------------------------------------------------------------------INSERT INTO ex
+INSERT INTO grl.tbl_ex(
+id, sqlstate, colname, constraintname, datatype, msgtext, tablename, schemaname, details, hint, context, extime, company_id, branche_id, store_id, user_id, eventtype_id, doctype_id, doc_id)
+VALUES(ex_id, ex_sqlstate, ex_colname, ex_constraintname, ex_datatype, ex_msgtext, ex_tablename, ex_schemaname, ex_details, ex_hint, ex_context, on_servertime, in_company_id, on_branch_id, null, in_user_id,69, on_doctype_id, in_cout_id);
+------------------------------------------------------------------------------------------------------Faild Return
+return QUERY select * from temp_EX;
+End
+
+$BODY$;
+	
+							  

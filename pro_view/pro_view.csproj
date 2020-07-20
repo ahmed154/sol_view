@@ -1,0 +1,441 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{8C17F6FF-7B74-4C39-A70F-8C09C15F1DB4}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>pro_view</RootNamespace>
+    <AssemblyName>pro_view</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>view.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Office.Interop.Excel, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Office.Interop.Excel.15.0.4795.1000\lib\net20\Microsoft.Office.Interop.Excel.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Npgsql, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Npgsql.4.0.0\lib\net451\Npgsql.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.0\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.0\lib\netstandard2.0\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="fld_BL\cls_bl.cs" />
+    <Compile Include="fld_BL\fld_School\fld_General_Setting\cls_General_Setting.cs" />
+    <Compile Include="fld_BL\fld_School\fld_Stu_Data\cls_Stu_Data.cs" />
+    <Compile Include="fld_DAL\cls_dal.cs" />
+    <Compile Include="fld_PL\fld_Accounting\fld_Settings\frm_cc.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_Accounting\fld_Settings\frm_cc.Designer.cs">
+      <DependentUpon>frm_cc.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_Accounting\fld_Settings\frm_chart.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_Accounting\fld_Settings\frm_chart.Designer.cs">
+      <DependentUpon>frm_chart.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_Accounting\fld_Settings\frm_jorclose.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_Accounting\fld_Settings\frm_jorclose.Designer.cs">
+      <DependentUpon>frm_jorclose.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_Accounting\frm_bs.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_Accounting\frm_bs.Designer.cs">
+      <DependentUpon>frm_bs.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_Accounting\frm_cin.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_Accounting\frm_cin.Designer.cs">
+      <DependentUpon>frm_cin.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_Accounting\frm_cinsettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_Accounting\frm_cinsettings.Designer.cs">
+      <DependentUpon>frm_cinsettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_Accounting\frm_cout.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_Accounting\frm_cout.Designer.cs">
+      <DependentUpon>frm_cout.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_Accounting\frm_is.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_Accounting\frm_is.Designer.cs">
+      <DependentUpon>frm_is.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_Accounting\frm_jor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_Accounting\frm_jor.Designer.cs">
+      <DependentUpon>frm_jor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_Accounting\frm_repdes.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_Accounting\frm_repdes.Designer.cs">
+      <DependentUpon>frm_repdes.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_Accounting\frm_statement.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_Accounting\frm_statement.Designer.cs">
+      <DependentUpon>frm_statement.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_Accounting\frm_tb.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_Accounting\frm_tb.Designer.cs">
+      <DependentUpon>frm_tb.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_General_Settings\frm_areas.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_General_Settings\frm_areas.Designer.cs">
+      <DependentUpon>frm_areas.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_General_Settings\frm_branches.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_General_Settings\frm_branches.Designer.cs">
+      <DependentUpon>frm_branches.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_General_Settings\frm_cities.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_General_Settings\frm_cities.Designer.cs">
+      <DependentUpon>frm_cities.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_General_Settings\frm_companies.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_General_Settings\frm_companies.Designer.cs">
+      <DependentUpon>frm_companies.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_General_Settings\frm_currencies.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_General_Settings\frm_currencies.Designer.cs">
+      <DependentUpon>frm_currencies.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_General_Settings\frm_fyears.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_General_Settings\frm_fyears.Designer.cs">
+      <DependentUpon>frm_fyears.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_General_Settings\frm_permissions.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_General_Settings\frm_permissions.Designer.cs">
+      <DependentUpon>frm_permissions.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_General_Settings\frm_PrintingDesigner.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_General_Settings\frm_PrintingDesigner.Designer.cs">
+      <DependentUpon>frm_PrintingDesigner.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_General_Settings\frm_stores.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_General_Settings\frm_stores.Designer.cs">
+      <DependentUpon>frm_stores.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_General_Settings\frm_users.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_General_Settings\frm_users.Designer.cs">
+      <DependentUpon>frm_users.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_Login\frm_login.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_Login\frm_login.Designer.cs">
+      <DependentUpon>frm_login.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_Login\frm_main.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_Login\frm_main.Designer.cs">
+      <DependentUpon>frm_main.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_Login\frm_newdatabase.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_Login\frm_newdatabase.Designer.cs">
+      <DependentUpon>frm_newdatabase.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_Login\frm_preventnu.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_Login\frm_preventnu.Designer.cs">
+      <DependentUpon>frm_preventnu.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_Login\frm_serverinfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_Login\frm_serverinfo.Designer.cs">
+      <DependentUpon>frm_serverinfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_School\fld_General_Setting\frm_Class.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_School\fld_General_Setting\frm_Class.Designer.cs">
+      <DependentUpon>frm_Class.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_General_Settings\frm_Nationality.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_General_Settings\frm_Nationality.Designer.cs">
+      <DependentUpon>frm_Nationality.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_School\fld_General_Setting\frm_Rows.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_School\fld_General_Setting\frm_Rows.Designer.cs">
+      <DependentUpon>frm_Rows.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_School\fld_General_Setting\frm_Scl_Stages.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_School\fld_General_Setting\frm_Scl_Stages.Designer.cs">
+      <DependentUpon>frm_Scl_Stages.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_School\fld_General_Setting\frm_Section.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_School\fld_General_Setting\frm_Section.Designer.cs">
+      <DependentUpon>frm_Section.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_School\fld_General_Setting\frm_Study.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_School\fld_General_Setting\frm_Study.Designer.cs">
+      <DependentUpon>frm_Study.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_School\fld_Stu_Data\frm_Stu_Main_Data.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_School\fld_Stu_Data\frm_Stu_Main_Data.Designer.cs">
+      <DependentUpon>frm_Stu_Main_Data.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fld_PL\fld_School\fld_Stu_Data\frm_Stu_Search.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fld_PL\fld_School\fld_Stu_Data\frm_Stu_Search.Designer.cs">
+      <DependentUpon>frm_Stu_Search.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="fld_PL\fld_Accounting\fld_Settings\frm_cc.resx">
+      <DependentUpon>frm_cc.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_Accounting\fld_Settings\frm_chart.resx">
+      <DependentUpon>frm_chart.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_Accounting\fld_Settings\frm_jorclose.resx">
+      <DependentUpon>frm_jorclose.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_Accounting\frm_bs.resx">
+      <DependentUpon>frm_bs.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_Accounting\frm_cin.resx">
+      <DependentUpon>frm_cin.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_Accounting\frm_cinsettings.resx">
+      <DependentUpon>frm_cinsettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_Accounting\frm_cout.resx">
+      <DependentUpon>frm_cout.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_Accounting\frm_is.resx">
+      <DependentUpon>frm_is.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_Accounting\frm_jor.resx">
+      <DependentUpon>frm_jor.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_Accounting\frm_repdes.resx">
+      <DependentUpon>frm_repdes.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_Accounting\frm_statement.resx">
+      <DependentUpon>frm_statement.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_Accounting\frm_tb.resx">
+      <DependentUpon>frm_tb.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_General_Settings\frm_areas.resx">
+      <DependentUpon>frm_areas.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_General_Settings\frm_branches.resx">
+      <DependentUpon>frm_branches.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_General_Settings\frm_cities.resx">
+      <DependentUpon>frm_cities.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_General_Settings\frm_currencies.resx">
+      <DependentUpon>frm_currencies.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_General_Settings\frm_fyears.resx">
+      <DependentUpon>frm_fyears.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_General_Settings\frm_permissions.resx">
+      <DependentUpon>frm_permissions.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_General_Settings\frm_PrintingDesigner.resx">
+      <DependentUpon>frm_PrintingDesigner.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_General_Settings\frm_stores.resx">
+      <DependentUpon>frm_stores.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_General_Settings\frm_users.resx">
+      <DependentUpon>frm_users.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_Login\frm_login.resx">
+      <DependentUpon>frm_login.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_Login\frm_main.resx">
+      <DependentUpon>frm_main.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_Login\frm_newdatabase.resx">
+      <DependentUpon>frm_newdatabase.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_Login\frm_preventnu.resx">
+      <DependentUpon>frm_preventnu.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_Login\frm_serverinfo.resx">
+      <DependentUpon>frm_serverinfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_General_Settings\frm_Nationality.resx">
+      <DependentUpon>frm_Nationality.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_School\fld_General_Setting\frm_Scl_Stages.resx">
+      <DependentUpon>frm_Scl_Stages.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_School\fld_Stu_Data\frm_Stu_Main_Data.resx">
+      <DependentUpon>frm_Stu_Main_Data.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fld_PL\fld_School\fld_Stu_Data\frm_Stu_Search.resx">
+      <DependentUpon>frm_Stu_Search.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\LockClose_128.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Lock_128.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\LockOpen_128.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\test.bmp" />
+    <None Include="Resources\test.txt" />
+    <None Include="Resources\_2.txt" />
+    <None Include="Resources\_3.txt" />
+    <None Include="Resources\_4.txt" />
+    <None Include="Resources\_5.txt" />
+    <None Include="Resources\_6.txt" />
+    <None Include="Resources\_7.txt" />
+    <None Include="Resources\_8.txt" />
+    <None Include="Resources\_9.txt" />
+    <None Include="Resources\_10.txt" />
+    <None Include="Resources\Reset_Data.txt" />
+    <None Include="Resources\Draft.txt" />
+    <None Include="Resources\_11.txt" />
+    <None Include="Resources\_12.txt" />
+    <None Include="Resources\CreateNewEmptyDatabase.txt" />
+    <None Include="Resources\loading-gif-icon-18.jpg" />
+    <None Include="Resources\InsertMainDataToNewDatabase.txt" />
+    <None Include="Resources\_13.txt" />
+    <None Include="Resources\_14.txt" />
+    <None Include="Resources\Printing.txt" />
+    <None Include="Resources\_15.txt" />
+    <None Include="Resources\_16.txt" />
+    <None Include="Resources\_17.txt" />
+    <None Include="Resources\_18.txt" />
+    <None Include="Resources\_19.txt" />
+    <Content Include="view.ico" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

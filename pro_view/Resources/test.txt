@@ -1,0 +1,106 @@
+-- FUNCTION: acc.fnc_chart_delete(character varying, character varying, character varying)
+
+-- DROP FUNCTION acc.fnc_chart_delete(character varying, character varying, character varying);
+
+CREATE OR REPLACE FUNCTION acc.fnc_chart_delete(
+	in_id character varying,
+	in_company_id character varying,
+	in_user_id character varying)
+    RETURNS SETOF acc.tbl_chart 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+
+declare 
+	on_parent_id text;
+	on_servertime timestamp;
+	on_current_edit smallint;
+	on_edit_id integer;
+	on_audit_id bigint;
+--------------------------------------
+	ex_id integer;
+	ex_sqlstate text;
+	ex_colname text; 
+	ex_constraintname text; 
+	ex_datatype text; 
+	ex_msgtext text; 
+	ex_tablename text; 
+	ex_schemaname text; 
+	ex_details text; 
+	ex_hint text; 
+	ex_context text; 
+BEGIN	
+	on_parent_id = (select parent_id from acc.tbl_chart WHERE id = in_id AND company_id = in_company_id);
+	ex_id = (select(select max(id) from grl.tbl_ex) + 1); if ex_id is null then ex_id = 1; end if;
+	on_edit_id = (select(select max(id) from acc.tbl_chartedit) + 1); if on_edit_id is null then on_edit_id = 1; end if;
+	on_audit_id = (select(select max(id) from grl.tbl_audit) + 1); if on_audit_id is null then on_audit_id = 1; end if;	
+	on_servertime = (select(current_timestamp));
+	on_current_edit = (select(select edit from acc.tbl_chart  WHERE id = in_id AND company_id = in_company_id));		
+-------------------------------------------------------------------------UPDATE acc.tbl_chartedit & UPDATE acc.tbl_chart
+INSERT INTO acc.tbl_chartedit(
+	id, chart_id, sequ, aname, ename, menue_id, side_id, ccrelation_id, cc1_id, cc2_id, property_id, company_id, branch_id, 
+	notes, stop, activetime, level, parent, parent_id, creationtime, editingtime, createuser_id, edituser_id, edit, delete)
+	SELECT on_edit_id, id, sequ, aname, ename, menue_id, side_id, ccrelation_id, cc1_id, cc2_id, property_id, company_id, branch_id, 
+	notes, stop, activetime, level, parent, parent_id, creationtime, on_servertime, createuser_id, in_user_id, on_current_edit, 1
+	FROM acc.tbl_chart
+	WHERE id = in_id AND company_id = in_company_id;
+
+DELETE FROM acc.tbl_chart
+	WHERE id = in_id AND company_id = in_company_id;
+	
+IF NOT EXISTS(SELECT id FROM acc.tbl_chart WHERE parent_id = on_parent_id AND company_id = in_company_id)
+	THEN
+		UPDATE acc.tbl_chart SET parent = 'false' WHERE id = on_parent_id AND company_id = in_company_id;
+	END IF;
+
+IF (select property_id from acc.tbl_chart where acc.tbl_chart.id = in_id) = '1' --if customer
+THEN
+
+DELETE FROM  acc.tbl_cust WHERE id = in_id AND company_id = in_company_id;
+
+End IF;
+
+IF (select property_id from acc.tbl_chart where acc.tbl_chart.id = in_id) = '2' -- if vendor
+THEN
+
+DELETE FROM  acc.tbl_ven WHERE id = in_id AND company_id = in_company_id;
+
+End IF;												
+------------------------------------------------------------------------------------------------------INSERT INTO audit
+INSERT INTO grl.tbl_audit(
+	id, eventtime, eventtype_id, doctype_id, doc_id, user_id, company_id)
+	VALUES (on_audit_id, on_servertime, 23, 7, in_id, in_user_id, in_company_id);
+------------------------------------------------------------------------------------------------------Success Return
+RETURN QUERY select * from acc.tbl_chart order by acc.tbl_chart.sequ;
+------------------------------------------------------------------------------------------------------EX
+EXCEPTION WHEN OTHERS THEN
+	GET STACKED DIAGNOSTICS
+		ex_sqlstate = RETURNED_SQLSTATE,
+		ex_colname = COLUMN_NAME,
+		ex_constraintname = CONSTRAINT_NAME,
+		ex_datatype = PG_DATATYPE_NAME,
+		ex_msgtext = MESSAGE_TEXT,
+		ex_tablename = TABLE_NAME,
+		ex_schemaname = SCHEMA_NAME,
+		ex_details = PG_EXCEPTION_DETAIL,
+		ex_hint = PG_EXCEPTION_HINT,
+		ex_context = PG_EXCEPTION_CONTEXT;
+
+	DROP TABLE IF EXISTS temp_EX;
+	CREATE TEMP TABLE temp_EX as SELECT * from acc.tbl_chart where id = '0';
+INSERT INTO temp_EX(notes)VALUES('PostgreSQL'||','|| ex_id || ',' || ex_sqlstate || ',' || ex_msgtext || ',' || ex_context);
+------------------------------------------------------------------------------------------------------INSERT INTO ex
+INSERT INTO grl.tbl_ex(
+id, sqlstate, colname, constraintname, datatype, msgtext, tablename, schemaname, details, hint, context, extime, company_id, branche_id, store_id, user_id, eventtype_id, doc_id)
+VALUES(ex_id, ex_sqlstate, ex_colname, ex_constraintname, ex_datatype, ex_msgtext, ex_tablename, ex_schemaname, ex_details, ex_hint, ex_context, on_servertime, in_company_id, null, null, in_user_id, 23, in_id);
+
+------------------------------------------------------------------------------------------------------Faild Return
+return QUERY select * from temp_EX;
+End
+
+$BODY$;
+
+

@@ -1,0 +1,391 @@
+DROP TABLE IF EXISTS acc.tbl_cin;
+
+CREATE TABLE acc.tbl_cin
+(
+    id character varying(10) COLLATE pg_catalog."default" NOT NULL,
+	sequ int NOT NULL,
+    jor_id character varying(15) COLLATE pg_catalog."default", 
+	notes text,
+    posted boolean NOT NULL DEFAULT false,
+    frozen boolean NOT NULL DEFAULT false,
+    closed boolean NOT NULL DEFAULT false,
+    creationtime timestamp without time zone NOT NULL,
+    createservertime timestamp without time zone NOT NULL,
+    createuser_id character varying(4) COLLATE pg_catalog."default" NOT NULL,
+    edit smallint NOT NULL DEFAULT 0,
+    cc1_id character varying(50) COLLATE pg_catalog."default",
+    cc2_id character varying(50) COLLATE pg_catalog."default",
+    fyear_id character varying(2) COLLATE pg_catalog."default",
+    branch_id character varying(3) COLLATE pg_catalog."default",
+    company_id character varying(2) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT pky_cin PRIMARY KEY (id, company_id),
+	
+    CONSTRAINT fky_cin_branchid_branches_id FOREIGN KEY (branch_id, company_id)
+        REFERENCES grl.tbl_branches (id, company_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_cin_cc1id_cc_id FOREIGN KEY (company_id, cc1_id)
+        REFERENCES acc.tbl_cc (company_id, id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_cin_cc2id_cc_id FOREIGN KEY (cc2_id, company_id)
+        REFERENCES acc.tbl_cc (id, company_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+
+    CONSTRAINT fky_cin_companyid_companies_id FOREIGN KEY (company_id)
+        REFERENCES grl.tbl_companies (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+
+    CONSTRAINT fky_cin_fyearid_fyears_id FOREIGN KEY (fyear_id)
+        REFERENCES grl.tbl_fyears (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_cin_jorid_jor_id FOREIGN KEY (jor_id, company_id)
+        REFERENCES acc.tbl_jor (id, company_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+);
+
+----------------------------------------------------------------------------------------------------------
+
+CREATE TABLE acc.tbl_cind
+(
+    cin_id character varying(10) COLLATE pg_catalog."default" NOT NULL,
+    jor_id character varying(15) COLLATE pg_catalog."default",
+    amoutn numeric NOT NULL DEFAULT 0,
+    chart_cin_id text COLLATE pg_catalog."default" NOT NULL,
+    chart_cout_id text COLLATE pg_catalog."default" NOT NULL,
+    notes text COLLATE pg_catalog."default",
+    paytype_id smallint NOT NULL,
+    checkcardno text COLLATE pg_catalog."default",
+    checkcarddate date,
+    sorno text COLLATE pg_catalog."default",
+    salno text COLLATE pg_catalog."default",
+    billdate date,
+    manualno text COLLATE pg_catalog."default",
+    currency_id character varying(2) COLLATE pg_catalog."default" NOT NULL,
+    currencyprice numeric NOT NULL DEFAULT 1,
+    posted boolean NOT NULL DEFAULT false,
+    frozen boolean NOT NULL DEFAULT false,
+    closed boolean NOT NULL DEFAULT false,
+    creationtime timestamp without time zone NOT NULL,
+    createservertime timestamp without time zone NOT NULL,
+    createuser_id character varying(4) COLLATE pg_catalog."default" NOT NULL,
+    edit smallint NOT NULL DEFAULT 0,
+    cc1_id character varying(50) COLLATE pg_catalog."default",
+    cc2_id character varying(50) COLLATE pg_catalog."default",
+    fyear_id character varying(2) COLLATE pg_catalog."default",
+    branch_id character varying(3) COLLATE pg_catalog."default",
+    company_id character varying(2) COLLATE pg_catalog."default" NOT NULL,
+	
+	CONSTRAINT fky_cind_cinid_cin_id FOREIGN KEY (cin_id, company_id)
+    REFERENCES acc.tbl_cin (id, company_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION,
+	
+    CONSTRAINT fky_cind_branchid_branches_id FOREIGN KEY (branch_id, company_id)
+        REFERENCES grl.tbl_branches (id, company_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_cind_cc1id_cc_id FOREIGN KEY (company_id, cc1_id)
+        REFERENCES acc.tbl_cc (company_id, id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_cind_cc2id_cc_id FOREIGN KEY (cc2_id, company_id)
+        REFERENCES acc.tbl_cc (id, company_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_cind_chartcinid_chart_id FOREIGN KEY (chart_cin_id, company_id)
+        REFERENCES acc.tbl_chart (id, company_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_cind_chartcoutid_chart_id FOREIGN KEY (company_id, chart_cout_id)
+        REFERENCES acc.tbl_chart (company_id, id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_cind_companyid_companies_id FOREIGN KEY (company_id)
+        REFERENCES grl.tbl_companies (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_cind_currencyid_currencies_id FOREIGN KEY (currency_id)
+        REFERENCES grl.tbl_currencies (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_cind_fyearid_fyears_id FOREIGN KEY (fyear_id)
+        REFERENCES grl.tbl_fyears (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_cind_jorid_jor_id FOREIGN KEY (company_id, jor_id)
+        REFERENCES acc.tbl_jor (company_id, id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_cind_paytype_id_paytype_id FOREIGN KEY (paytype_id)
+        REFERENCES grl.tbl_paytype (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+);
+
+----------------------------------------------------------------------------------------------------------------------
+
+CREATE OR REPLACE VIEW acc.viw_cin_select AS
+
+SELECT 
+h.id AS h_id, 
+h.sequ AS h_sequ, 
+h.jor_id AS h_jor_id, 
+h.posted AS h_posted, 
+h.frozen AS h_frozen, 
+h.closed AS h_closed, 
+h.creationtime AS h_creationtime, 
+h.createservertime AS h_createservertime, 
+h.createuser_id AS h_createuser_id, 
+h.edit AS h_edit, 
+h.cc1_id AS h_cc1_id, 
+h.cc2_id AS h_cc2_id, 
+h.fyear_id AS h_fyear_id, 
+h.branch_id AS h_branch_id, 
+h.company_id AS h_company_id,
+
+d.cin_id AS d_cin_id, 
+d.jor_id AS d_jor_id, 
+d.amoutn AS d_amoutn, 
+d.chart_cin_id AS d_chart_cin_id, 
+chartin.aname AS d_chart_cin_aname, 
+chartin.ename AS d_chart_cin_ename, 
+d.chart_cout_id AS d_chart_cout_id, 
+chartout.aname AS d_chart_cout_aname, 
+chartout.ename AS d_chart_cout_ename, 
+d.notes AS d_notes, 
+d.paytype_id AS d_paytype_id, 
+paytype.aname AS d_paytype_aname, 
+paytype.ename AS d_paytype_ename, 
+d.checkcardno AS d_checkcardno, 
+d.checkcarddate AS d_checkcarddate, 
+d.sorno AS d_sorno, 
+d.salno AS d_salno, 
+d.billdate AS d_billdate, 
+d.manualno AS d_manualno, 
+d.currency_id AS d_currency_id, 
+currency.aname AS d_currency_aname, 
+currency.ename AS d_currency_ename, 
+d.currencyprice AS d_currencyprice, 
+d.posted AS d_posted, 
+d.frozen AS d_frozen, 
+d.closed AS d_closed, 
+d.creationtime AS d_creationtime, 
+d.createservertime AS d_createservertime, 
+d.createuser_id AS d_createuser_id, 
+d.edit AS d_edit, 
+d.cc1_id AS d_cc1_id, 
+cc1.aname AS d_cc1_aname,
+cc1.ename AS d_cc1_ename,
+d.cc2_id AS d_cc2_id, 
+cc2.aname AS d_cc2_aname,
+cc2.ename AS d_cc2_ename,
+d.fyear_id AS d_fyear_id, 
+d.branch_id AS d_branch_id, 
+branch.aname AS d_branch_aname,
+branch.ename AS d_branch_ename,
+d.company_id AS d_company_id
+
+   FROM acc.tbl_cind d
+     LEFT JOIN acc.tbl_cin h ON d.cin_id::text = h.id::text
+     LEFT JOIN acc.tbl_chart chartin ON d.chart_cin_id = chartin.id::text
+	 LEFT JOIN acc.tbl_chart chartout ON d.chart_cout_id = chartout.id::text
+	 LEFT JOIN grl.tbl_paytype paytype ON d.paytype_id = paytype.id
+	 LEFT JOIN grl.tbl_currencies currency ON d.currency_id = currency.id
+     LEFT JOIN acc.tbl_cc cc1 ON d.cc1_id::text = cc1.id::text
+     LEFT JOIN acc.tbl_cc cc2 ON d.cc2_id::text = cc2.id::text
+     LEFT JOIN grl.tbl_branches branch ON d.branch_id::text = branch.id::text
+  WHERE branch.company_id::text = d.company_id::text
+  ORDER BY d.ctid;
+-----------------------------------------------------------------------------------------------------------------
+DELETE FROM grl.tbl_events WHERE id IN(60, 61, 62);
+INSERT INTO grl.tbl_events(id, aname, ename)VALUES (60, '«÷«›… ”‰œ ﬁ»÷', 'Add Cash Receipt');
+INSERT INTO grl.tbl_events(id, aname, ename)VALUES (61, ' ⁄œÌ· ”‰œ ﬁ»÷', 'Update Cash Receipt');
+INSERT INTO grl.tbl_events(id, aname, ename)VALUES (62, 'Õ–› ”‰œ ﬁ»÷', 'Delete Cash Receipt');
+	
+DELETE FROM grl.tbl_doctype WHERE id = 19;
+INSERT INTO grl.tbl_doctype(id, aname, ename, schema, moudel_id)
+	VALUES (19, '”‰œ ﬁ»÷', 'Cash Receipt', 'acc', '02');
+-----------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION acc.fnc_cin_insert(
+	in_id character varying,
+	in_notes text,
+	in_company_id character varying,
+	in_fyear_id character varying,
+	in_branch_id character varying,
+	in_cc1_id character varying,
+	in_cc2_id character varying,
+	in_creationtime timestamp without time zone,
+	in_user_id character varying,
+	in_cind json)
+    RETURNS SETOF acc.viw_cin_select 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+
+declare 
+	on_servertime timestamp; 
+	on_sequ smallint;
+	on_xsequ text;
+	on_audit_id bigint;
+-------------------------------------------
+	i jsonb;
+	on_cinD_amount numeric;
+	on_cinD_chart_cin_id text;
+	on_cinD_chart_cout_id text;
+	on_cinD_notes text;
+	on_cinD_paytype_id text;
+	
+	on_cinD_checkcardno text; 
+	on_cinD_checkcarddate text;
+	on_cinD_sorno text; 
+	on_cinD_salno text; 
+	on_cinD_billdate timestamp;
+	on_cinD_manualno text; 
+	on_cinD_currency_id text;
+	on_cinD_currencyprice text; 
+	
+	on_cinD_cc1_id text;
+	on_cinD_cc2_id text;
+	on_cinD_branch_id text;
+--------------------------------------------
+	ex_id integer;
+	ex_sqlstate text;
+	ex_colname text; 
+	ex_constraintname text; 
+	ex_datatype text; 
+	ex_msgtext text; 
+	ex_tablename text; 
+	ex_schemaname text; 
+	ex_details text; 
+	ex_hint text; 
+	ex_context text; 
+BEGIN
+	ex_id = (select(select max(id) from grl.tbl_ex) + 1); if ex_id is null then ex_id = 1; end if;
+	on_audit_id = (select(select max(id) from grl.tbl_audit) + 1); if on_audit_id is null then on_audit_id = 1; end if;	
+	on_servertime = (select(current_timestamp));
+					 
+	on_sequ = (select(select max(sequ) from acc.tbl_cin
+					  WHERE branch_id = in_branch_id	
+					  AND company_id = in_company_id	   
+					 ) + 1);
+					 					 
+	on_sequ = (select case when (on_sequ is NULL) then 1 else on_sequ end);
+	on_xsequ = on_sequ::text;
+	
+	WHILE (length(on_xsequ) < 10)
+		loop
+			on_xsequ = (select concat('0',on_xsequ));
+		end loop;
+		
+	in_id = (in_branch_id || on_xsequ);
+------------------------------------------------------------------------------------------------------INSERT INTO cin 
+INSERT INTO acc.tbl_cin(
+	id, sequ, notes, creationtime, createservertime, createuser_id, cc1_id, cc2_id, fyear_id, branch_id, company_id)
+	VALUES (
+		in_id, 
+		on_sequ, 
+		in_notes,		 
+		in_creationtime, 
+		on_servertime, 
+		in_user_id,
+		in_cc1_id, 
+		in_cc2_id,
+		in_fyear_id, 
+		in_branch_id, 
+		in_company_id);
+------------------------------------------------------------------------------------------------------INSERT INTO cinD 
+FOR i IN SELECT * FROM json_array_elements(in_cind)
+  LOOP
+
+	on_cinD_amount := i->>'amount';
+	on_cinD_chart_cin_id := i->>'cin_id';
+	on_cinD_chart_cout_id := i->>'cout_id';
+    on_cinD_notes := i->>'notes';
+	on_cinD_paytype_id := i->>'paytype_id';
+	on_cinD_checkcardno := i->>'checkcardno'; 
+	on_cinD_checkcarddate := i->>'checkcarddate';
+	on_cinD_sorno := i->>'sorno'; 
+	on_cinD_salno := i->>'salno'; 
+	on_cinD_billdate := i->>'billdate';
+	on_cinD_manualno := i->>'manualno'; 
+	on_cinD_currency_id := i->>'currency_id';
+	on_cinD_currencyprice := i->>'currencyprice';	
+    on_cinD_cc1_id := i->>'cc1_id';
+    on_cinD_cc2_id := i->>'cc2_id';
+    on_cinD_branch_id := i->>'branch_id';
+	
+	on_cinD_cc1_id = (select case when (on_cinD_cc1_id IS NULL OR on_cinD_cc1_id = '') THEN in_cc1_id else on_cinD_cc1_id end);
+	on_cinD_cc2_id = (select case when (on_cinDcc2_id IS NULL OR on_cinD_cc2_id = '') THEN in_cc2_id else on_cinD_cc2_id end);
+	on_cinD_branch_id = (select case when (on_cinD_branch_id IS NULL OR on_cinD_branch_id = '') THEN in_branch_id else on_cinD_branch_id end);
+	
+	INSERT INTO acc.tbl_cind(
+	cin_id, amoutn, chart_cin_id, chart_cout_id, notes, paytype_id, checkcardno, checkcarddate, sorno, salno, billdate, 
+		manualno, currency_id, currencyprice, creationtime, createservertime, createuser_id, 
+		cc1_id, cc2_id, fyear_id, branch_id, company_id)	
+	
+	VALUES (
+		in_id, 		
+	on_cinD_amount,
+	on_cinD_chart_cin_id,
+	on_cinD_chart_cout_id,
+    on_cinD_notes,
+	on_cinD_paytype_id,
+	on_cinD_checkcardno,
+	on_cinD_checkcarddate,
+	on_cinD_sorno,
+	on_cinD_salno,
+	on_cinD_billdate,
+	on_cinD_manualno,
+	on_cinD_currency_id,
+	on_cinD_currencyprice,
+	in_creationtime, 
+	on_servertime, 
+	in_user_id,
+	on_cinD_cc1_id, 
+	on_cinD_cc2_id, 
+	in_fyear_id,
+	on_cinD_branch_id,
+	in_company_id
+	);
+		
+ END LOOP;
+------------------------------------------------------------------------------------------------------INSERT INTO audit
+INSERT INTO grl.tbl_audit(
+	id, eventtime, eventtype_id, doctype_id, doc_id, user_id, company_id)
+	VALUES (on_audit_id, on_servertime, 60, 19, in_id, in_user_id, in_company_id);
+------------------------------------------------------------------------------------------------------Success Return
+RETURN QUERY select * from acc.viw_cin_Select where h_id = in_id;
+------------------------------------------------------------------------------------------------------EX
+EXCEPTION WHEN OTHERS THEN
+	GET STACKED DIAGNOSTICS
+		ex_sqlstate = RETURNED_SQLSTATE,
+		ex_colname = COLUMN_NAME,
+		ex_constraintname = CONSTRAINT_NAME,
+		ex_datatype = PG_DATATYPE_NAME,
+		ex_msgtext = MESSAGE_TEXT,
+		ex_tablename = TABLE_NAME,
+		ex_schemaname = SCHEMA_NAME,
+		ex_details = PG_EXCEPTION_DETAIL,
+		ex_hint = PG_EXCEPTION_HINT,
+		ex_context = PG_EXCEPTION_CONTEXT;
+	DROP TABLE IF EXISTS temp_EX;
+	CREATE TEMP TABLE temp_EX as SELECT * from acc.viw_cin_Select where h_id = '0';
+	INSERT INTO temp_EX(h_notes)VALUES('PostgreSQL'||','|| ex_id || ',' || ex_sqlstate || ',' || ex_msgtext || ',' || ex_context);
+------------------------------------------------------------------------------------------------------INSERT INTO ex
+INSERT INTO grl.tbl_ex(
+id, sqlstate, colname, constraintname, datatype, msgtext, tablename, schemaname, details, hint, context, extime, company_id, branche_id, store_id, user_id, eventtype_id, doc_id)
+VALUES(ex_id, ex_sqlstate, ex_colname, ex_constraintname, ex_datatype, ex_msgtext, ex_tablename, ex_schemaname, ex_details, ex_hint, ex_context, on_servertime, in_company_id, in_branch_id, null, in_user_id,60, in_id);
+------------------------------------------------------------------------------------------------------Faild Return
+return QUERY select * from temp_EX;
+End
+
+$BODY$;
+

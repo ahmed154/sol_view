@@ -1,0 +1,9 @@
+CREATE TABLE grl.tbl_update
+(
+    id smallint NOT NULL,
+    aname text ,
+    ename text ,
+    notes text ,
+	ddate timestamp NOT NULL,
+    CONSTRAINT pky_update PRIMARY KEY (id)
+)

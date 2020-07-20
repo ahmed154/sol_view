@@ -1,0 +1,2 @@
+INSERT INTO grl.tbl_events(id, aname, ename)VALUES (71, '≈‰‘«¡  ’„Ì„ ÿ»«⁄…', 'Create Printing Design')on conflict (id) do nothing;
+INSERT INTO grl.tbl_doctype(id, aname, ename, schema)VALUES (21, '‰„Ê–Ã ÿ»«⁄…', 'Printing Design', 'grl')on conflict (id) do nothing;

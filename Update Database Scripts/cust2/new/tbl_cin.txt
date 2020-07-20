@@ -1,0 +1,68 @@
+DROP TABLE acc.tbl_cin;
+
+CREATE TABLE acc.tbl_cin
+(
+    id character varying(10) COLLATE pg_catalog."default" NOT NULL,
+    amoutn numeric NOT NULL DEFAULT 0,
+    chart_cin_id text COLLATE pg_catalog."default" NOT NULL,
+    chart_cout_id text COLLATE pg_catalog."default" NOT NULL,
+    notes text COLLATE pg_catalog."default",
+    paytype_id smallint NOT NULL,
+    checkcardno text COLLATE pg_catalog."default",
+    checkcarddate date,
+    sorno text COLLATE pg_catalog."default",
+    salno text COLLATE pg_catalog."default",
+    billdate date,
+    manualno text COLLATE pg_catalog."default",
+    currency_id character varying(2) COLLATE pg_catalog."default" NOT NULL,
+    currencyprice numeric NOT NULL DEFAULT 1,
+    posted boolean NOT NULL DEFAULT false,
+	frozen boolean NOT NULL DEFAULT false,
+	closed boolean NOT NULL DEFAULT false,
+    creationtime timestamp without time zone NOT NULL,
+    createservertime timestamp without time zone NOT NULL,
+    createuser_id character varying(4) COLLATE pg_catalog."default" NOT NULL,
+    edit smallint NOT NULL DEFAULT 0,
+    cc1_id character varying(50) COLLATE pg_catalog."default",
+    cc2_id character varying(50) COLLATE pg_catalog."default",
+    fyear_id character varying(2) COLLATE pg_catalog."default",
+    branch_id character varying(3) COLLATE pg_catalog."default",
+    company_id character varying(2) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT pky_cin PRIMARY KEY (id, company_id),
+    CONSTRAINT fky_cin_branchid_branches_id FOREIGN KEY (branch_id, company_id)
+        REFERENCES grl.tbl_branches (id, company_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_cin_cc1id_cc_id FOREIGN KEY (company_id, cc1_id)
+        REFERENCES acc.tbl_cc (company_id, id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_cin_cc2id_cc_id FOREIGN KEY (cc2_id, company_id)
+        REFERENCES acc.tbl_cc (id, company_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_cin_chartcinid_chart_id FOREIGN KEY (chart_cin_id, company_id)
+        REFERENCES acc.tbl_chart (id, company_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_cin_chartcoutid_chart_id FOREIGN KEY (company_id, chart_cout_id)
+        REFERENCES acc.tbl_chart (company_id, id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_cin_companyid_companies_id FOREIGN KEY (company_id)
+        REFERENCES grl.tbl_companies (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_cin_currencyid_currencies_id FOREIGN KEY (currency_id)
+        REFERENCES grl.tbl_currencies (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_cin_fyearid_fyears_id FOREIGN KEY (fyear_id)
+        REFERENCES grl.tbl_fyears (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_cin_paytype_id_paytype_id FOREIGN KEY (paytype_id)
+        REFERENCES grl.tbl_paytype (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)

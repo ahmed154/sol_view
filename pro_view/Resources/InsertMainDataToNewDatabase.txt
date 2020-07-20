@@ -1,0 +1,317 @@
+
+	
+DELETE FROM grl.tbl_companies;	
+INSERT INTO grl.tbl_companies(
+	id, sequ, aname, ename, creationtime, createuser_id)
+	VALUES ('01', 1, '«·‘—ﬂ… «·—∆Ì”Ì…', 'Main Company', '01/01/2019', '0001');
+	
+DELETE FROM grl.tbl_fyears;	
+INSERT INTO grl.tbl_fyears(id, sequ, aname, ename, beigndate, enddate,    company_id, branch_id, creationtime,  createuser_id)
+	VALUES ('01', 1,
+			(select date_part('year', current_timestamp) as year),
+			(select date_part('year', current_timestamp) as year),
+			TO_DATE((select '01/01/'||(select extract(year from (select(current_timestamp))))), 'DD/MM/YYYY'),
+			TO_DATE((select '31/12/'||(select extract(year from (select(current_timestamp))))), 'DD/MM/YYYY'),
+			'01', '001', (SELECT NOW()), '0001');
+	
+DELETE FROM grl.tbl_branches;	
+INSERT INTO grl.tbl_branches(id, sequ, aname, ename,  company_id, creationtime, createuser_id)
+	VALUES ('001', 1, '«·›—⁄ «·—∆Ì”Ì', 'Main Branch', '01', '01/01/2019', '0001');
+
+DELETE FROM grl.tbl_system;
+insert into grl.tbl_system(scl)values('false');
+DELETE FROM grl.tbl_update;
+insert into grl.tbl_update(id, ddate)values(12, (select(current_timestamp)));
+DELETE FROM grl.tbl_currencies;
+INSERT INTO grl.tbl_currencies(
+	id, sequ, aname, ename, asymbol, esymbol, price,  company_id, branch_id, creationtime, createuser_id)
+	VALUES ('01', 1, '—Ì«· ”⁄ÊœÌ', 'Saudian Rial', '—”', 'SAR', 1, '01', '001', (select(current_timestamp)), '001'),
+		   ('02', 2, 'œÊ·«— √„—ÌﬂÌ', 'Dollar', 'œÊ·«—', 'USD', 3.75, '01', '001', (select(current_timestamp)), '001');
+																				   
+DELETE FROM grl.tbl_doctype;
+INSERT INTO grl.tbl_doctype(id,aname,ename,schema,notes,moudel_id)VALUES
+('1','«·‘—ﬂ« ','Companies','grl',null,'01'),
+('2','«·›—Ê⁄','Branches','grl',null,'01'),
+('3','«·„” Êœ⁄« ','Stores','grl',null,'01'),
+('4','«·”‰Ê«  «·„«·Ì…','Financial year','grl',null,'01'),
+('5','«·„” Œœ„Ê‰','Users','grl',null,'04'),
+('6','«·⁄„·« ','Currencies','grl',null,'02'),
+('7','œ·Ì· «·Õ”«»« ','Chart','acc',null,'02'),
+('8','„—«ﬂ“ «· ﬂ·›…','Cost Center','grl',null,'02'),
+('9','«·Ã‰”Ì« ','Nationality','grl',null,'01'),
+('10','œ› — «·ﬁÌÊœ','Jornal','acc',null,'02'),
+('11','«·„œ‰','Cities','grl',null,'01'),
+('12','«·«ÕÌ«¡','ˆAreas','grl',null,'01'),
+('13','«·„—«Õ· «·œ—«”Ì…','School Grade','scl',null,'05'),
+('14','«·’›Ê› «·œ—«”Ì…','School Rows','scl',null,'05'),
+('15','«·›’Ê· «· ⁄·Ì„Ì…','School Classroom','scl',null,'05'),
+('16','‰Ê⁄ «·œ«—”…','School Study Type','scl',null,'05'),
+('17','«·ﬁ”„ «·œ—«”Ì','Study Section','scl',null,'05'),
+('18','«· ﬁ«—Ì—','Reports','grl',null,''),
+('19','”‰œ ﬁ»÷','Cash Receipt','acc',null,'02'),
+('20','”‰œ ’—›','Payment Voucher','acc',null,'02');
+
+DELETE FROM grl.tbl_events;
+INSERT INTO grl.tbl_events(id,aname,ename,notes,priority)VALUES
+('1',' ”ÃÌ· œŒÊ·','Login',null,null),
+('2',' ”ÃÌ· Œ—ÊÃ','Log out',null,null),
+('3','≈‰‘«¡ ‘—ﬂ…','Create company',null,null),
+('4',' ⁄œÌ· »Ì«‰«  ‘—ﬂ…','Edit company data',null,null),
+('5','Õ–› ‘—ﬂ…','Delete company',null,null),
+('6','«÷«›… ›—⁄','Add branch',null,null),
+('7',' ⁄œÌ· »Ì«‰«  ›—⁄','Edit branch data',null,null),
+('8','Õ–› ›—⁄','Delete branch',null,null),
+('9','«÷«›… „” Êœ⁄','Add store',null,null),
+('10',' ⁄œÌ· »Ì«‰«  „” Êœ⁄','Edit store data',null,null),
+('11','Õ–› „” Êœ⁄','Delete store',null,null),
+('12','«÷«›… ”‰… „«·Ì…','Add financial year',null,null),
+('13',' ⁄œÌ· »Ì«‰«  ”‰… „«·Ì…','Edit financial year data',null,null),
+('14','Õ–› ”‰… „«·Ì…','Delete financial year',null,null),
+('15','«÷«›… „” Œœ„','Add user',null,null),
+('16',' ⁄œÌ· »Ì«‰«  „” Œœ„','Edit user data',null,null),
+('17','Õ–› „” Œœ„','Delete user',null,null),
+('18','«÷«›… ⁄„·…','Add currency',null,null),
+('19',' ⁄œÌ· »Ì«‰«  ⁄„·…','Edit currency data',null,null),
+('20','Õ–› ⁄„·…','Delete currency',null,null),
+('21','«÷«›… Õ”«»','Add Account',null,null),
+('22',' ⁄œÌ· »Ì«‰«  Õ”«»','Edit Account Data',null,null),
+('23','Õ–› Õ”«»','Delete Account',null,null),
+('24','«÷«›… „—ﬂ“  ﬂ·›…','Add Cost Center',null,null),
+('25',' ⁄œÌ· »Ì«‰«  „—ﬂ“  ﬂ·›…','Edit cost center data',null,null),
+('26','Õ–› „—ﬂ“  ﬂ·›…','Delete Cost Center',null,null),
+('27','«÷«›… Ã‰”Ì…','Add Nationality',null,null),
+('28',' ⁄œÌ· Ã‰”Ì…','ıEdit Nationality',null,null),
+('29','Õ–› Ã‰”Ì…','Delete Nationality',null,null),
+('30','«÷«›… ﬁÌœ','Add Entry',null,null),
+('31',' ⁄œÌ· ﬁÌœ','Edit Entry',null,null),
+('32','Õ–› ﬁÌœ','Delete Entry',null,null),
+('33','≈÷«›… „œÌ‰…','Add City',null,null),
+('34',' ⁄œÌ· „œÌ‰…','Edit City',null,null),
+('35','Õ–› „œÌ‰…','Delete City',null,null),
+('36','≈÷«›… ÕÌ','Add Area',null,null),
+('37',' ⁄œÌ· ÕÌ','Edit Area',null,null),
+('38','Õ–› ÕÌ','Delete Area',null,null),
+('39',' ≈÷«›… „—Õ·… œ—«”Ì…','Add School Grade',null,null),
+('40',' ⁄œÌ· „—Õ·… œ—«”Ì…','Edit School Grade',null,null),
+('41','Õ–› „—Õ·… œ—«”Ì…','Delete School Grade',null,null),
+('42','≈÷«›… ’› œ—«”Ì','Add School Row',null,null),
+('43',' ⁄œÌ· ’› œ—«”Ì','Edit School Row',null,null),
+('44','Õ–› ’› œ—«”Ì','Delete School Row',null,null),
+('45','≈÷«›… ›’· œ—«”Ì','Add Classroom',null,null),
+('46',' ⁄œÌ· ›’· œ—«”Ì','Edit Classroom',null,null),
+('47','Õ–› ›’· œ—«”Ì','Delete Classroom',null,null),
+('48','≈÷«›… ‰Ê⁄ œ—«”…','Add Study Type',null,null),
+('49',' ⁄œÌ· ‰Ê⁄ œ—«”…','Edit Study Type',null,null),
+('50','Õ–› ‰Ê⁄ œ—«”…','Delete Study Type',null,null),
+('51','≈÷«›… ﬁ”„ œ—«”Ì','Add Study Section',null,null),
+('52',' ⁄œÌ· ﬁ”„ œ—«”Ì','Edit Study Section',null,null),
+('53','Õ–› ﬁ”„ œ—«”Ì','Delete Study Section',null,null),
+('54','≈÷«›… Ê·Ì «„—','Add New Parent',null,null),
+('55',' ⁄œÌ· »Ì«‰«  Ê·Ì «„—','Edit Parent Data',null,null),
+('56','Õ–› Ê·Ì «„—','Delete Parent',null,null),
+('57','«÷«›…  ﬁ—Ì—','Add New Report',null,null),
+('58',' ⁄œÌ·  ﬁ—Ì—','Edit Report',null,null),
+('59','Õ–›  ﬁ—Ì—','Delete Report',null,null),
+('60','«÷«›… ”‰œ ﬁ»÷','Add Cash Receipt',null,null),
+('61',' ⁄œÌ· ”‰œ ﬁ»÷','Update Cash Receipt',null,null),
+('62','Õ–› ”‰œ ﬁ»÷','Delete Cash Receipt',null,null),
+('63',' —ÕÌ· ”‰œ ﬁ»÷','Cash Receipt Post',null,null),
+('64','≈·€«¡  —ÕÌ· ”‰œ ﬁ»÷','Cancel Cash Receipt Post',null,null),
+('65','«÷«›… ”‰œ ’—›','Add payment voucher',null,null),
+('67','Õ–› ”‰œ ’—›','Delete payment voucher',null,null),
+('68',' —ÕÌ· ”‰œ ’—›','payment voucher Post',null,null),
+('69','≈·€«¡  —ÕÌ· ”‰œ ’—›','Cancel payment voucher Post',null,null),
+('70','≈ﬁ›«· «·Õ”«»« ','Close Accounting',null,null);
+
+DELETE FROM grl.tbl_gender;
+INSERT INTO grl.tbl_gender(id,aname,ename,notes)VALUES
+('1','–ﬂ—','Male',null),
+('2','√‰ÀÏ','Female',null);
+
+DELETE FROM grl.tbl_lvlnuset;
+INSERT INTO grl.tbl_lvlnuset(doctypeid,lvlnu,nu)VALUES
+('1','1','1'),
+('1','6','4'),
+('1','7','4'),
+('1','8','4'),
+('1','9','4'),
+('2','3','4'),
+('2','4','4'),
+('2','5','4'),
+('2','6','4'),
+('2','7','4'),
+('2','8','4'),
+('2','9','4'),
+('1','2','1'),
+('1','3','2'),
+('1','4','2'),
+('1','5','2'),
+('2','1','1'),
+('2','2','2');
+
+DELETE FROM grl.tbl_moduels;
+INSERT INTO grl.tbl_moduels(id,sequ,aname,ename,stop,activetime)VALUES
+('01','1','«·«⁄œ«œ«  «·⁄«„…','General Settings','False',null),
+('02','2','«·Õ”«»«  «·⁄«„…','General Accounts','False',null),
+('03','3','«·„” Êœ⁄« ','Warehouses','False',null),
+('04','4','«·„” Œœ„Ê‰','Users','False',null),
+('05','5','«·„œ«—”','Schools','False',null);
+
+DELETE FROM grl.tbl_paytype;
+INSERT INTO grl.tbl_paytype(id,aname,ename,notes)VALUES
+('1','‰ﬁœ«','Cach',null),
+('2','‘»ﬂ…','ATM',null),
+('3','‘Ìﬂ','Check',null),
+('4','ÕÊ«·…','Transfer',null);
+
+DELETE FROM grl.tbl_permissions;
+INSERT INTO grl.tbl_permissions(id,sequ,aname,ename,doctype_id,activetime)VALUES
+('101','11','≈÷«›… ‘—ﬂ…','Add Companies','1',null),
+('102','12',' ⁄œÌ· »Ì«‰«  ‘—ﬂ…','Edit Company Data','1',null),
+('103','13','Õ–› ‘—ﬂ…','Delete Company','1',null),
+('104','14','«” ⁄—«÷ «·‘—ﬂ« ','Display Companies','1',null),
+('105','15','ÿ»«⁄… «·‘—ﬂ« ','Print Companies','1',null),
+('201','21','≈÷«›… ›—⁄','Add Branch','2',null),
+('202','22',' ⁄œÌ· »Ì«‰«  ›—⁄','Edit Branch Data','2',null),
+('203','23','Õ–› ›—⁄','Delete Branch','2',null);
+
+
+
+DELETE FROM acc.tbl_chartccrelation;
+INSERT INTO acc.tbl_chartccrelation(id,aname,ename)VALUES
+('1','«ŒÌ«—Ì','Optional'),
+('2','«Ã»«—Ì','Mandatory'),
+('3','»œÊ‰','Without');
+
+DELETE FROM acc.tbl_chartlists;
+INSERT INTO acc.tbl_chartlists(id,aname,ename)VALUES
+('1','«·„Ì“«‰Ì…','Balance sheet'),
+('2','ﬁ«∆„… «·œŒ·','income list');
+
+DELETE FROM acc.tbl_chartprop;
+INSERT INTO acc.tbl_chartprop(id,aname,ename)VALUES
+('1','⁄„Ì·','Customer'),
+('2','„Ê—œ','Vendor'),
+('3','„Œ“Ê‰','Stock'),
+('4','√—»«Õ „œÊ—…','Retained earnings'),
+('5','Œ”«∆— „œÊ—…','Retained Loss');
+
+DELETE FROM acc.tbl_chartside;
+INSERT INTO acc.tbl_chartside(id,aname,ename)VALUES
+('1','„œÌ‰','Debit'),
+('2','œ«∆‰','Credit');
+
+DELETE FROM acc.tbl_chart;
+INSERT INTO acc.tbl_chart(id,sequ,aname,ename,menue_id,side_id,ccrelation_id,cc1_id,cc2_id,property_id,company_id,branch_id,notes,stop,activetime,level,parent,parent_id,creationtime,editingtime,createuser_id,edituser_id,edit)VALUES
+('1','1','«·«’Ê·','«·«’Ê·','1','1','1','','','','01','001',null,'False',null,'1','True',null,(select(current_timestamp)),null,'0001','','0'),
+('11','1','«·«’Ê· «·„ œ«Ê·…','«·«’Ê· «·„ œ«Ê·…','1','1','1','','','','01','001',null,'False',null,'2','True','1',(select(current_timestamp)),null,'0001','','0'),
+('1101','1','«Ã„«·Ì «·‰ﬁœÌ…','«Ã„«·Ì «·‰ﬁœÌ…','1','1','1','','','','01','001',null,'False',null,'3','True','11',(select(current_timestamp)),null,'0001','','0'),
+('110101','1','‰ﬁœÌ… »«·’‰«œÌﬁ','‰ﬁœÌ… »«·’‰«œÌﬁ','1','1','1','','','','01','001',null,'False',null,'4','False','1101',(select(current_timestamp)),null,'0001','','0'),
+('110102','2','‰ﬁœÌ… »«·»‰Êﬂ','‰ﬁœÌ… »«·»‰Êﬂ','1','1','1','','','','01','001',null,'False',null,'4','False','1101',(select(current_timestamp)),null,'0001','','0'),
+('1102','2','«·–„„ «·„œÌ‰…','«·–„„ «·„œÌ‰…','1','1','1','','','','01','001',null,'False',null,'3','True','11',(select(current_timestamp)),null,'0001','0001','1'),
+('110201','1','«·⁄„·«¡','«·⁄„·«¡','1','1','1','','','','01','001',null,'False',null,'4','False','1102',(select(current_timestamp)),null,'0001','','0'),
+('1103','3','«·„Œ“Ê‰','«·„Œ“Ê‰','1','1','1','','','','01','001',null,'False',null,'3','False','11',(select(current_timestamp)),null,'0001','','0'),
+('1104','4','«—’œ… „œÌ‰… «Œ—Ï','«—’œ… „œÌ‰… «Œ—Ï','1','1','1','','','','01','001',null,'False',null,'3','False','11',(select(current_timestamp)),null,'0001','','0'),
+('12','2','«·«’Ê· «·À«» …','«·«’Ê· «·À«» …','1','1','1','','','','01','001',null,'False',null,'2','True','1',(select(current_timestamp)),null,'0001','','0'),
+('1201','1','’«›Ì «·«’Ê· «·À«» …','’«›Ì «·«’Ê· «·À«» …','1','1','1','','','','01','001',null,'False',null,'3','True','12',(select(current_timestamp)),null,'0001','','0'),
+('120101','1','«·«’Ê· «·À«» …','«·«’Ê· «·À«» …','1','1','1','','','','01','001',null,'False',null,'4','True','1201',(select(current_timestamp)),null,'0001','','0'),
+('12010101','1','”Ì«—« ','”Ì«—« ','1','1','1','','','','01','001',null,'False',null,'5','False','120101',(select(current_timestamp)),null,'0001','','0'),
+('12010102','2','«À«À Ê„›—Ê‘« ','«À«À Ê„›—Ê‘« ','1','1','1','','','','01','001',null,'False',null,'5','False','120101',(select(current_timestamp)),null,'0001','','0'),
+('12010103','3','«ÃÂ“… Õ«”» Ê»—«„Ã','«ÃÂ“… Õ«”» Ê»—«„Ã','1','1','1','','','','01','001',null,'False',null,'5','False','120101',(select(current_timestamp)),null,'0001','','0'),
+('12010104','4','«ÃÂ“… ﬂÂ—»«∆Ì…','«ÃÂ“… ﬂÂ—»«∆Ì…','1','1','1','','','','01','001',null,'False',null,'5','False','120101',(select(current_timestamp)),null,'0001','','0'),
+('12010105','5','⁄œœ Ê«œÊ« ','⁄œœ Ê«œÊ« ','1','1','1','','','','01','001',null,'False',null,'5','False','120101',(select(current_timestamp)),null,'0001','','0'),
+('120102','2','„Ã„⁄ «Â·«ﬂ «·«’Ê· «·À«» …','„Ã„⁄ «Â·«ﬂ «·«’Ê· «·À«» …','1','1','1','','','','01','001',null,'False',null,'4','False','1201',(select(current_timestamp)),null,'0001','','0'),
+('2','2','«·Œ’Ê„','«·Œ’Ê„','1','2','1','','','','01','001',null,'False',null,'1','True',null,(select(current_timestamp)),null,'0001','0001','1'),
+('21','1','«· “«„«  „ œ«Ê·…','«· “«„«  „ œ«Ê·…','1','2','1','','','','01','001',null,'False',null,'2','True','2',(select(current_timestamp)),null,'0001','','0'),
+('2101','1','«·–„„ «·œ«∆‰…','«·–„„ «·œ«∆‰…','1','2','1','','','','01','001',null,'False',null,'3','True','21',(select(current_timestamp)),null,'0001','0001','2'),
+('210101','1','«·„Ê—œÊ‰','«·„Ê—œÊ‰','1','2','1','','','','01','001',null,'False',null,'4','True','2101',(select(current_timestamp)),null,'0001','0001','4'),
+('210102','2','œ«∆‰Ê‰ „ ‰Ê⁄Ê‰','œ«∆‰Ê‰ „ ‰Ê⁄Ê‰','1','2','1','','','','01','001',null,'False',null,'4','False','2101',(select(current_timestamp)),null,'0001','','0'),
+('22','2','«· “«„«  €Ì— „ œ«Ê·…','«· “«„«  €Ì— „ œ«Ê·…','1','2','1','','','','01','001',null,'False',null,'2','False','2',(select(current_timestamp)),null,'0001','','0'),
+('23','3','ÕﬁÊﬁ «·„·ﬂÌ…','ÕﬁÊﬁ «·„·ﬂÌ…','1','2','1','','','','01','001',null,'False',null,'2','True','2',(select(current_timestamp)),null,'0001','','0'),
+('2301','1','ÕﬁÊﬁ «·„·ﬂÌ…','ÕﬁÊﬁ «·„·ﬂÌ…','1','2','1','','','','01','001',null,'False',null,'3','True','23',(select(current_timestamp)),null,'0001','','0'),
+('230101','1','—√” «·„«·','—√” «·„«·','1','2','1','','','','01','001',null,'False',null,'4','False','2301',(select(current_timestamp)),null,'0001','','0'),
+('3','3','«·«Ì—«œ« ','«·«Ì—«œ« ','2','2','1','','','','01','001',null,'False',null,'1','True',null,(select(current_timestamp)),null,'0001','0001','2'),
+('31','1','«Ã„«·Ì «·«Ì—«œ« ','«Ã„«·Ì «·«Ì—«œ« ','2','2','1','','','','01','001',null,'False',null,'2','True','3',(select(current_timestamp)),null,'0001','','0'),
+('3101','1','«Ì—«œ«  «·„‘«—Ì⁄','«Ì—«œ«  «·„‘«—Ì⁄','2','2','1','','','','01','001',null,'False',null,'3','True','31',(select(current_timestamp)),null,'0001','0001','2'),
+('310101','1','’«›Ì «Ì—«œ«  «·„‘«—Ì⁄','«Ì—«œ«  «·„‘«—Ì⁄','2','2','1','','','','01','001',null,'False',null,'4','True','3101',(select(current_timestamp)),null,'0001','0001','1'),
+('31010101','1','«Ì—«œ«  «·„‘«—Ì⁄','«Ì—«œ«  «·„‘«—Ì⁄','2','2','1','','','','01','001',null,'False',null,'5','False','310101',(select(current_timestamp)),null,'0001','','0'),
+('3102','2','«·„»Ì⁄« ','«·„»Ì⁄« ','2','2','1','','','','01','002',null,'False',null,'3','True','31',(select(current_timestamp)),null,'0001','0002','1'),
+('310201','1','’«›Ì «·„»Ì⁄« ','’«›Ì «·„»Ì⁄« ','2','2','1','','','','01','002',null,'False',null,'4','True','3102',(select(current_timestamp)),null,'0002','','0'),
+('31020101','1','«·„»Ì⁄« ','«·„»Ì⁄« ','2','2','1','','','','01','002',null,'False',null,'5','False','310201',(select(current_timestamp)),null,'0002','','0'),
+('31020102','2','„—œÊœ«  «·„»Ì⁄« ','„—œÊœ«  «·„»Ì⁄« ','2','2','1','','','','01','002',null,'False',null,'5','False','310201',(select(current_timestamp)),null,'0002','','0'),
+('31020103','3','Œ’„ „”„ÊÕ »Â','Œ’„ „”„ÊÕ »Â','2','2','1','','','','01','002',null,'False',null,'5','False','310201',(select(current_timestamp)),null,'0002','','0'),
+('31020104','4','„’«—Ì› «·„»Ì⁄« ','„’«—Ì› «·„»Ì⁄« ','2','2','1','','','','01','002',null,'False',null,'5','False','310201',(select(current_timestamp)),null,'0002','','0'),
+('4','4','«·„’—Ê›« ','«·„’—Ê›« ','2','1','1','','','','01','001',null,'False',null,'1','True',null,(select(current_timestamp)),null,'0001','0001','3'),
+('41','1','«·„’—Ê›« ','«·„’—Ê›« ','2','1','1','','','','01','001',null,'False',null,'2','True','4',(select(current_timestamp)),null,'0001','','0'),
+('4101','1','„’«—Ì› «· ‘€Ì·','„’«—Ì› «· ‘€Ì·','2','1','1','','','','01','001',null,'False',null,'3','True','41',(select(current_timestamp)),null,'0001','','0'),
+('410101','1','„’«—Ì› «·„‘«—Ì⁄','„’«—Ì› «·„‘«—Ì⁄','2','1','1','','','','01','001',null,'False',null,'4','True','4101',(select(current_timestamp)),null,'0001','','0'),
+('41010101','1','«ÃÊ— ⁄„«·Â','«ÃÊ— ⁄„«·Â','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('41010102','2','«⁄„«· Õœ«œ…','«⁄„«· Õœ«œ…','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','0001','1'),
+('41010103','3','«⁄„«· ‰Ã«—…','«⁄„«· ‰Ã«—…','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','0001','1'),
+('41010104','4','«⁄„«· ﬂÂ—»«¡','«⁄„«· ﬂÂ—»«¡','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('41010105','5','«⁄„«· ·Ì«À…','«⁄„«· ·Ì«À…','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('41010106','6','«⁄„«· Œ—”«‰…','«⁄„«· Œ—”«‰…','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','0001','1'),
+('41010107','7','Œ‘»','Œ‘»','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('41010108','8','„Ê«œ ‰Ã«—… Ê”»«ﬂ… ÊﬂÂ—»«¡','„Ê«œ ‰Ã«—… Ê”»«ﬂ… ÊﬂÂ—»«¡','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','0001','1'),
+('41010109','9','„Ê«œ »‰«¡','„Ê«œ »‰«¡','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('41010110','10','«⁄„«· ⁄“·','«⁄„«· ⁄“·','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('41010111','11','÷Ì«›… Ê»Ê›ÌÂ','÷Ì«›… Ê»Ê›ÌÂ','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('41010112','12','„’«—Ì› ‰À—Ì…','„’«—Ì› ‰À—Ì…','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('41010113','13','«⁄„«· „”«Õ…','«⁄„«· „”«Õ…','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('41010114','14','«⁄„«· „Œ »—','«⁄„«· „Œ »—','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('41010115','15','«⁄„«· Õ›—','«⁄„«· Õ›—','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('41010116','16','„Ì«…','„Ì«…','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('41010117','17','‰ﬁ· Ê‘Õ‰','‰ﬁ· Ê‘Õ‰','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('41010118','18','«⁄„«· ⁄Ÿ„','«⁄„«· ⁄Ÿ„','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('41010119','19','«ÌÃ«— „⁄œ« ','«ÌÃ«— „⁄œ« ','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('41010120','20','«⁄„«· ”»«ﬂ…','«⁄„«· ”»«ﬂ…','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('41010121','21','«⁄„«· »·«ÿ Ê”Ì—«„Ìﬂ','«⁄„«· »·«ÿ Ê”Ì—«„Ìﬂ','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('41010122','22','„Õ—Êﬁ« ','„Õ—Êﬁ« ','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('41010123','23','«⁄„«· œÂ«‰','«⁄„«· œÂ«‰','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('41010124','24','«⁄„«· «„«‰ Ê”·«„…','«⁄„«· «„«‰ Ê”·«„…','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('41010125','25','«⁄„«· «»Êﬂ”Ì','«⁄„«· «»Êﬂ”Ì','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('41010126','26','«⁄„«· »Õ’','«⁄„«· »Õ’','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('41010127','27','«⁄„«· Ã»”','«⁄„«· Ã»”','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('41010128','28','«⁄„«· «·”ﬁ«·« ','«⁄„«· «·”ﬁ«·« ','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('41010129','29','«⁄«‘… «·⁄„«·','«⁄«‘… «·⁄„«·','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('41010130','30','—Ê« » Ê«ÃÊ—','—Ê« » Ê«ÃÊ—','2','1','1','','','','01','002',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('41010131','31','ﬁ—ÿ«”Ì… Ê„ÿ»Ê⁄« ','ﬁ—ÿ«”Ì… Ê„ÿ»Ê⁄« ','2','1','1','','','','01','002',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('41010132','32','«ÌÃ«— ”Ì«—« ','«ÌÃ«— ”Ì«—« ','2','1','1','','','','01','001',null,'False',null,'5','False','410101',(select(current_timestamp)),null,'0001','','0'),
+('410102','2','„’«—Ì›  ‘€Ì·Ì…','„’«—Ì›  ‘€Ì·Ì…','2','1','1','','','','01','001',null,'False',null,'4','True','4101',(select(current_timestamp)),null,'0001','','0'),
+('41010201','1','«ÌÃ«— ”ﬂ‰ «·⁄«„·Ì‰','«ÌÃ«— ”ﬂ‰ «·⁄«„·Ì‰','2','1','1','','','','01','001',null,'False',null,'5','False','410102',(select(current_timestamp)),null,'0001','','0'),
+('41010202','2','—”Ê„ ÕﬂÊ„Ì…','—”Ê„ ÕﬂÊ„Ì…','2','1','1','','','','01','001',null,'False',null,'5','False','410102',(select(current_timestamp)),null,'0001','','0'),
+('41010203','3','«ÌÃ«— «·„ﬂ »','«ÌÃ«— «·„ﬂ »','2','1','1','','','','01','001',null,'False',null,'5','False','410102',(select(current_timestamp)),null,'0001','','0'),
+('41010204','4','⁄„Ê·«  »Ì⁄Ì…','⁄„Ê·«  »Ì⁄Ì…','2','1','1','','','','01','002',null,'False',null,'5','False','410102',(select(current_timestamp)),null,'0001','','0'),
+('41010205','5','—Ê« » Ê√ÃÊ—- ‘€Ì·Ì','—Ê« » Ê√ÃÊ—- ‘€Ì·Ì','2','1','1','','','','01','002',null,'False',null,'5','False','410102',(select(current_timestamp)),null,'0002','','0'),
+('41010206','6','⁄·«Ã ÿ»Ì','⁄·«Ã ÿ»Ì','2','1','1','','','','01','002',null,'False',null,'5','False','410102',(select(current_timestamp)),null,'0001','','0'),
+('41010207','7','»œ· ”›—','»œ· ”›—','2','1','1','','','','01','002',null,'False',null,'5','False','410102',(select(current_timestamp)),null,'0002','','0'),
+('41010208','8','’Ì«‰… Ê ‘€Ì· «·”Ì«—« ','’Ì«‰… Ê ‘€Ì· «·”Ì«—« ','2','1','1','','','','01','002',null,'False',null,'5','False','410102',(select(current_timestamp)),null,'0002','','0'),
+('4102','2','«·„’«—Ì› «·⁄„Ê„Ì… Ê«·«œ«—Ì…','«·„’«—Ì› «·⁄„Ê„Ì… Ê«·«œ«—Ì…','2','1','1','','','','01','001',null,'False',null,'3','True','41',(select(current_timestamp)),null,'0001','','0'),
+('410201','1','„’«—Ì› ⁄„Ê„Ì… Ê«œ«—Ì…','„’«—Ì› ⁄„Ê„Ì… Ê«œ«—Ì…','2','1','1','','','','01','001',null,'False',null,'4','True','4102',(select(current_timestamp)),null,'0001','','0'),
+('41020101','1','«·—Ê« » Ê«·«ÃÊ—-⁄','«·—Ê« » Ê«·«ÃÊ—-⁄','2','1','1','','','','01','001',null,'False',null,'5','False','410201',(select(current_timestamp)),null,'0001','','0'),
+('41020102','2','—Ê« » ”⁄ÊœÌÌ‰','—Ê« » ”⁄ÊœÌÌ‰','2','1','1','','','','01','002',null,'False',null,'5','False','410201',(select(current_timestamp)),null,'0002','','0'),
+('41020103','3','›Ê« Ì— ﬂÂ—»«¡ Ê« ’«·« ','›Ê« Ì— ﬂÂ—»«¡ Ê« ’«·« ','2','1','1','','','','01','001',null,'False',null,'5','False','410201',(select(current_timestamp)),null,'0002','','0'),
+('4103','3','„’«—Ì› »Ì⁄Ì… Ê ”ÊÌﬁÌ…','„’«—Ì› »Ì⁄Ì… Ê ”ÊÌﬁÌ…','2','1','1','','','','01','001',null,'False',null,'3','False','41',(select(current_timestamp)),null,'0001','','0'),
+('4104','4','„’«—Ì› «Œ—Ï','„’«—Ì› «Œ—Ï','2','1','1','','','','01','001',null,'False',null,'3','True','41',(select(current_timestamp)),null,'0001','','0'),
+('410401','1','„’«—Ì› «Œ—Ï','„’«—Ì› «Œ—Ï','2','1','1','','','','01','001',null,'False',null,'4','True','4104',(select(current_timestamp)),null,'0001','','0'),
+('41040101','1','⁄„Ê·«  »‰ﬂÌ…','⁄„Ê·«  »‰ﬂÌ…','2','1','1','','','','01','001',null,'False',null,'5','False','410401',(select(current_timestamp)),null,'0001','','0'),
+('42','2','«·„‘ —Ì« ','«·„‘ —Ì« ','2','1','1','','','','01','002',null,'False',null,'2','True','4',(select(current_timestamp)),null,'0001','','0'),
+('4201','1','’«›Ì «·„‘ —Ì« ','’«›Ì «·„‘ —Ì« ','2','1','1','','','','01','002',null,'False',null,'3','True','42',(select(current_timestamp)),null,'0001','','0'),
+('420101','1','’«›Ì «·„‘ —Ì« ','’«›Ì «·„‘ —Ì« ','2','1','1','','','','01','002',null,'False',null,'4','True','4201',(select(current_timestamp)),null,'0001','','0'),
+('42010101','1','«·„‘ —Ì« ','«·„‘ —Ì« ','2','1','1','','','','01','002',null,'False',null,'5','False','420101',(select(current_timestamp)),null,'0001','','0'),
+('42010102','2','„—œÊœ«  «·„‘ —Ì« ','„—œÊœ«  «·„‘ —Ì« ','2','1','1','','','','01','002',null,'False',null,'5','False','420101',(select(current_timestamp)),null,'0001','','0'),
+('42010103','3','Œ’„ „”„ÊÕ »Â','Œ’„ „”„ÊÕ »Â','2','1','1','','','','01','002',null,'False',null,'5','False','420101',(select(current_timestamp)),null,'0001','','0'),
+('42010104','4','„’«—Ì› «·„‘ —Ì« ','„’«—Ì› «·„‘ —Ì« ','2','1','1','','','','01','002',null,'False',null,'5','False','420101',(select(current_timestamp)),null,'0001','','0');
+
+DELETE FROM acc.tbl_jortype;
+INSERT INTO acc.tbl_jortype(id,aname,ename)VALUES
+('1','ﬁÌœ ÌÊ„Ì…','Journal Entry '),
+('2','«›  «ÕÌ Õ”«»« ','Opening accounting'),
+('3','«›  «ÕÌ „Œ“Ê‰','Opening Stock'),
+('4','ﬁÌœ  ”ÊÌ…','Adjusting Entry'),
+('5','„‘ —Ì« ','Purchases'),
+('6','«—Ã«⁄ „‘ —Ì« ','Purchases Return'),
+('7','„»Ì⁄« ','Sales'),
+('8','«—Ã«⁄ „»Ì⁄« ','Sales Return'),
+('9','”‰œ ﬁ»÷','Cash Receipt'),
+('10','”‰œ ’—›','Payment Voucher');

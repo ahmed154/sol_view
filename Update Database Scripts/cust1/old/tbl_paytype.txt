@@ -1,0 +1,15 @@
+CREATE TABLE grl.tbl_paytype
+(
+    id smallint NOT NULL,
+    aname text COLLATE pg_catalog."default",
+    ename text COLLATE pg_catalog."default",
+    notes text COLLATE pg_catalog."default",
+    CONSTRAINT pky_paytype PRIMARY KEY (id)
+);
+INSERT INTO grl.tbl_paytype(
+	id, aname, ename)
+	VALUES 
+	(1, '‰ﬁœ', 'Cach'),
+	(2, '‘»ﬂ…', 'ATM'),
+	(3, '‘Ìﬂ', 'Check'),
+	(4, 'ÕÊ«·…', 'Transfer');

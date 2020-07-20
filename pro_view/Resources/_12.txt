@@ -1,0 +1,299 @@
+alter table acc.tbl_jor add column IF NOT EXISTS frozen boolean NOT NULL DEFAULT 'false';
+alter table acc.tbl_jor add column IF NOT EXISTS closed boolean NOT NULL DEFAULT 'false';
+alter table acc.tbl_jord add column IF NOT EXISTS frozen boolean NOT NULL DEFAULT 'false';
+alter table acc.tbl_jord add column IF NOT EXISTS closed boolean NOT NULL DEFAULT 'false';
+
+INSERT INTO grl.tbl_events(id, aname, ename)VALUES (70, 'ÅÞÝÇá ÇáÍÓÇÈÇÊ', 'Close Accounting')on conflict (id) do nothing;
+
+
+DROP FUNCTION IF EXISTS  acc.fnc_jor_close(text, json, text, text, text, timestamp without time zone, text);
+DROP FUNCTION IF EXISTS acc.fnc_jor_close_jord(text, text, text);
+DROP FUNCTION IF EXISTS acc.fnc_jor_close_jord_cc(text, text, text);
+--------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION acc.fnc_jor_close_jord(
+	in_company_id text,
+	in_branch_id text,
+	in_fyear_id text)
+    RETURNS TABLE(ret_chart_id text, ret_debit numeric, ret_credit numeric, ret_currency_id character varying, ret_currencyprice numeric) 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+
+BEGIN
+
+RETURN QUERY SELECT chart_id, sum(debit) AS debit, sum(credit) AS credit, currency_id, currencyprice
+FROM acc.tbl_jord
+WHERE company_id = in_company_id AND branch_id = in_branch_id AND fyear_id = in_fyear_id AND chart_id IN (select id from acc.tbl_chart where menue_id = '1')
+GROUP BY chart_id, currency_id, currencyprice;
+
+End
+
+$BODY$;
+--------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION acc.fnc_jor_close_jord_cc(
+	in_company_id text,
+	in_branch_id text,
+	in_fyear_id text)
+    RETURNS TABLE(ret_chart_id text, ret_debit numeric, ret_credit numeric, ret_currency_id character varying, ret_currencyprice numeric, ret_cc1_id character varying, ret_cc2_id character varying) 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+
+BEGIN
+
+RETURN QUERY SELECT chart_id, sum(debit) AS debit, sum(credit) AS credit, currency_id, currencyprice, cc1_id, cc2_id
+FROM acc.tbl_jord
+WHERE company_id = in_company_id AND branch_id = in_branch_id AND fyear_id = in_fyear_id AND chart_id IN (select id from acc.tbl_chart where menue_id = '1')
+GROUP BY chart_id, currency_id, currencyprice, cc1_id, cc2_id;
+
+End
+
+$BODY$;
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION acc.fnc_jor_close(
+	in_company_id text,
+	in_branches_ids json,
+	in_oldfyear_id text,
+	in_newfyear_id text,
+	in_cc boolean,
+	in_user_id text,
+	in_date timestamp without time zone,
+	in_notes text)
+    RETURNS SETOF acc.viw_jor_select 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+
+declare 
+	on_servertime timestamp; 
+	on_int_seq smallint;
+	on_string_seq text;
+	on_audit_id bigint;
+-------------------------------------------
+	on_yyyy text;
+	on_yy text;
+	on_MM text;
+	on_ref text;
+	on_date timestamp;
+	on_branch_id text;
+	on_jor_id text;
+	on_jortype_id text;
+	on_jorD_id integer;
+-------------------------------------------
+	i jsonb;
+	on_eventtype_id smallint;
+	on_doctype_id smallint;
+	rec RECORD;
+--------------------------------------------
+	on_jorD_chart_id text;								   
+	on_jorD_debit  numeric;
+    on_jorD_credit  numeric;										       		
+    on_jorD_currency_id text;
+	on_jorD_currencyprice numeric;	
+	on_jorD_cc1_id text;
+	on_jorD_cc2_id text;
+	
+	on_balance numeric;
+	on_balance_chart_id text;
+--------------------------------------------
+	ex_id integer;
+	ex_sqlstate text;
+	ex_colname text; 
+	ex_constraintname text; 
+	ex_datatype text; 
+	ex_msgtext text; 
+	ex_tablename text; 
+	ex_schemaname text; 
+	ex_details text; 
+	ex_hint text; 
+	ex_context text; 
+BEGIN
+	ex_id = (select(select max(id) from grl.tbl_ex) + 1); if ex_id is null then ex_id = 1; end if;
+	on_audit_id = (select(select max(id) from grl.tbl_audit) + 1); if on_audit_id is null then on_audit_id = 1; end if;	
+	on_servertime = (select(current_timestamp));
+	on_jorD_id = (select(select max(id) from acc.tbl_jorD) + 1); if on_jorD_id is null then on_jorD_id = 1; end if;	
+	
+	on_jortype_id = '2';				
+	on_eventtype_id = 70;
+	on_doctype_id = 10;
+																			
+	--CREATE TABLE IF NOT EXISTS acc.tbl_arch_jor( like acc.tbl_jor including all);
+							
+FOR i IN SELECT * FROM json_array_elements(in_branches_ids)
+  LOOP
+			
+	on_branch_id := i->>'id';
+	on_yyyy = (select extract(year from   in_date));
+	on_MM = (select extract(month from   in_date));
+	on_MM = (select case when (length(on_MM) = 1) then (select concat('0',on_MM)) else on_MM end);
+	on_ref = '000';
+
+	on_int_seq = 1;
+	on_string_seq = '00001';											
+	
+	on_date = (select beigndate from grl.tbl_fyears where id = in_newfyear_id);												
+	on_yy = (select substring((select extract(year from (select beigndate from grl.tbl_fyears where id = in_newfyear_id))::text) from 3 for 2));	
+	on_jor_id = (on_branch_id || on_yy || on_string_seq);	
+											  
+							  
+	WHILE exists(select 1 from acc.tbl_cin where postedjor_id = on_branch_id)
+	loop
+		on_int_seq = on_int_seq + 1;
+		on_string_seq = on_sequ::text;
+		on_string_seq = repeat('0', 5 - length(on_string_seq)) || on_string_seq;
+		on_jor_id = (on_branch_id || on_yy || on_string_seq);
+	end loop;	
+							  
+	WHILE exists(select 1 from acc.tbl_cout where postedjor_id = on_jor_id)
+	loop
+		on_int_seq = on_int_seq + 1;
+		on_string_seq = on_sequ::text;
+		on_string_seq = repeat('0', 5 - length(on_string_seq)) || on_string_seq;
+		on_jor_id = (on_branch_id || on_yy || on_string_seq);
+	end loop;						
+							
+							
+  	INSERT INTO acc.tbl_jor(id, sequ, jortype_id, currency_id, yyyy, MM, ref, notes, company_id, fyear_id, 
+	branch_id, creationtime, createservertime, createuser_id, frozen)
+	VALUES (
+		on_jor_id, 
+		on_int_seq, 
+		on_jortype_id,
+		'01',
+		on_yyyy,
+		on_MM,
+		on_ref,
+		in_notes,
+		in_company_id, 
+		in_newfyear_id, 
+		on_branch_id, 
+		on_date, 
+		on_servertime, 
+		in_user_id,
+	    'true');	
+------------------------------------------------------------------------------------------------------INSERT INTO acc.tbl_jord	
+	 DROP TABLE IF EXISTS temp_close;
+	 IF (in_cc = 'true') THEN											   
+	 	CREATE TEMP TABLE temp_close as SELECT * from acc.fnc_jor_close_jord_cc(in_company_id, on_branch_id, in_oldfyear_id) order by ret_chart_id;
+	 ELSE	
+		CREATE TEMP TABLE temp_close as SELECT * from acc.fnc_jor_close_jord(in_company_id, on_branch_id, in_oldfyear_id) order by ret_chart_id;									   
+	 END IF;									   
+											   
+	 FOR rec IN SELECT * FROM temp_close
+        LOOP
+			on_jorD_chart_id = rec.ret_chart_id;								   
+			on_jorD_debit = rec.ret_debit;
+    		on_jorD_credit = rec.ret_credit;										       		
+    		on_jorD_currency_id = rec.ret_currency_id;
+			on_jorD_currencyprice = rec.ret_currencyprice;									   
+			IF (in_cc = 'true') THEN on_jorD_cc1_id = rec.ret_cc1_id; ELSE  on_jorD_cc1_id = NULL; END IF;
+			IF (in_cc = 'true') THEN on_jorD_cc2_id = rec.ret_cc2_id; ELSE  on_jorD_cc1_id = NULL; END IF;							   
+											   
+			IF (on_jorD_debit > on_jorD_credit) THEN		   		 
+				on_jorD_debit = on_jorD_debit - on_jorD_credit;
+				on_jorD_credit = 0;	
+		   ELSIF(on_jorD_debit < on_jorD_credit) THEN
+				on_jorD_credit = on_jorD_credit - on_jorD_debit;
+				on_jorD_debit = 0;	
+		   ELSIF(on_jorD_debit = on_jorD_credit) THEN	
+				on_jorD_debit = 0;
+				on_jorD_credit = 0;	
+		   END IF;								   
+			
+			IF 	(on_jorD_debit <> on_jorD_credit) THEN						   
+			INSERT INTO acc.tbl_jord
+    		(id, jor_id, debit, credit, chart_id, doctype_id, doc_id, currency_id, 
+			 currencyprice, cc1_id, cc2_id, jortype_id, yyyy, mm, ref, 
+			 company_id, fyear_id, branch_id, 
+			 creationtime, createservertime, createuser_id, frozen)	
+			VALUES
+			(on_jord_id, on_jor_id, on_jorD_debit, on_jorD_credit, on_jorD_chart_id, on_doctype_id, on_jor_id, on_jorD_currency_id,
+			 on_jorD_currencyprice, on_jorD_cc1_id, on_jorD_cc2_id, on_jortype_id, on_yyyy, on_mm, on_ref, 
+			 in_company_id, in_newfyear_id, on_branch_id, 
+		     on_date, on_servertime, in_user_id, 'true'
+			);
+   		
+			on_jorD_id = on_jorD_id + 1;	
+			END IF;									   
+ 		END LOOP;			
+		
+	 on_balance = (select sum(ret_debit) - sum(ret_credit) from temp_close);
+											   
+	 IF on_balance > 1 THEN 
+	 	on_balance_chart_id = (SELECT id FROM acc.tbl_chart WHERE stop = 'false' AND company_id = in_company_id AND parent = 'false' AND property_id = '4' limit 1);
+			INSERT INTO acc.tbl_jord
+    		(id, jor_id, debit, credit, chart_id, doctype_id, doc_id, currency_id, 
+			 currencyprice, cc1_id, cc2_id, jortype_id, yyyy, mm, ref, 
+			 company_id, fyear_id, branch_id, 
+			 creationtime, createservertime, createuser_id, frozen)	
+			VALUES
+			(on_jord_id, on_jor_id, 0, on_balance, on_balance_chart_id, on_doctype_id, on_jor_id, on_jorD_currency_id,
+			 on_jorD_currencyprice, on_jorD_cc1_id, on_jorD_cc2_id, on_jortype_id, on_yyyy, on_mm, on_ref, 
+			 in_company_id, in_newfyear_id, on_branch_id, 
+		     on_date, on_servertime, in_user_id, 'true'
+			);
+											   
+	 ELSEIF on_balance < 1 THEN 
+	 	on_balance_chart_id = (SELECT id FROM acc.tbl_chart WHERE stop = 'false' AND company_id = in_company_id AND parent = 'false' AND property_id = '5' limit 1);	
+		on_balance = on_balance * -1;								   
+			INSERT INTO acc.tbl_jord
+    		(id, jor_id, debit, credit, chart_id, doctype_id, doc_id, currency_id, 
+			 currencyprice, cc1_id, cc2_id, jortype_id, yyyy, mm, ref, 
+			 company_id, fyear_id, branch_id, 
+			 creationtime, createservertime, createuser_id, frozen)	
+			VALUES
+			(on_jord_id, on_jor_id, on_balance, 0, on_balance_chart_id, on_doctype_id, on_jor_id, on_jorD_currency_id,
+			 on_jorD_currencyprice, on_jorD_cc1_id, on_jorD_cc2_id, on_jortype_id, on_yyyy, on_mm, on_ref, 
+			 in_company_id, in_newfyear_id, on_branch_id, 
+		     on_date, on_servertime, in_user_id, 'true'
+			);									   
+											   
+	 END IF;										   
+											   
+END LOOP;										   
+------------------------------------------------------------------------------------------------------INSERT INTO audit
+INSERT INTO grl.tbl_audit(
+	id, eventtime, eventtype_id, doctype_id, doc_id, user_id, company_id)
+	VALUES (on_audit_id, on_servertime, on_eventtype_id, on_doctype_id, on_jor_id, in_user_id, in_company_id);
+------------------------------------------------------------------------------------------------------Success Return
+RETURN QUERY select * from acc.viw_jor_Select where h_id = on_jor_id;
+------------------------------------------------------------------------------------------------------EX
+EXCEPTION WHEN OTHERS THEN
+	GET STACKED DIAGNOSTICS
+		ex_sqlstate = RETURNED_SQLSTATE,
+		ex_colname = COLUMN_NAME,
+		ex_constraintname = CONSTRAINT_NAME,
+		ex_datatype = PG_DATATYPE_NAME,
+		ex_msgtext = MESSAGE_TEXT,
+		ex_tablename = TABLE_NAME,
+		ex_schemaname = SCHEMA_NAME,
+		ex_details = PG_EXCEPTION_DETAIL,
+		ex_hint = PG_EXCEPTION_HINT,
+		ex_context = PG_EXCEPTION_CONTEXT;
+	DROP TABLE IF EXISTS temp_EX;
+	CREATE TEMP TABLE temp_EX as SELECT * from acc.viw_jor_Select where h_id = '0';
+	INSERT INTO temp_EX(h_notes)VALUES('PostgreSQL'||','|| ex_id || ',' || ex_sqlstate || ',' || ex_msgtext || ',' || ex_context);
+------------------------------------------------------------------------------------------------------INSERT INTO ex
+INSERT INTO grl.tbl_ex(
+id, sqlstate, colname, constraintname, datatype, msgtext, tablename, schemaname, details, hint, context, extime, company_id, branche_id, store_id, user_id, eventtype_id, doc_id)
+VALUES(ex_id, ex_sqlstate, ex_colname, ex_constraintname, ex_datatype, ex_msgtext, ex_tablename, ex_schemaname, ex_details, ex_hint, ex_context, on_servertime, in_company_id, on_branch_id, null, in_user_id, on_eventtype_id, on_jor_id);
+------------------------------------------------------------------------------------------------------Faild Return
+return QUERY select * from temp_EX;
+End
+
+$BODY$;
+--------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------

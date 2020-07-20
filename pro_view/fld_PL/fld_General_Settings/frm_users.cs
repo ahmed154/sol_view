@@ -1,0 +1,514 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace pro_view.fld_PL.fld_General_Settings
+{
+    public partial class frm_users : Form
+    {
+        #region Declarations
+        public pro_view.fld_PL.fld_Login.frm_main frm_main;
+        pro_view.fld_BL.cls_bl.stc_General_Settings.stc_users module = new fld_BL.cls_bl.stc_General_Settings.stc_users();
+        DataSet ds = new DataSet();
+        int record_index;
+        #endregion
+
+        public frm_users()
+        {
+            InitializeComponent();
+
+            dgv.AutoGenerateColumns = false;
+            txt_password.UseSystemPasswordChar = true;
+        }
+
+        #region Form
+        private void frm_G_Shown(object sender, EventArgs e)
+        {
+            //ControlsName();
+            Refresh_Data();
+            dgv.Focus();
+        }
+        #endregion
+
+        #region Pro
+        void ClearForm()
+        {
+            foreach (Control c in gbx_Details.Controls)
+            {
+                if (c is TextBox)
+                {
+                    c.Text = "";
+                }
+                else if (c is ComboBox)
+                {
+                    ((ComboBox)c).SelectedValue = -1;
+                }
+                else if (c is CheckBox)
+                {
+                    ((CheckBox)c).Checked = false;
+                }
+            }
+        }
+        void EnableForm()
+        {
+            foreach (Control c in gbx_Details.Controls)
+            {
+                if (c is TextBox)
+                {
+                    ((TextBox)c).ReadOnly = false;
+                }
+                else
+                {
+                    c.Enabled = true;
+                }
+            }
+            dgv.Enabled = false;
+            txt_id.ReadOnly = true;
+        }
+        void DisableForm()
+        {
+            foreach (Control c in gbx_Details.Controls)
+            {
+                if (c is TextBox)
+                {
+                    ((TextBox)c).ReadOnly = true;
+                }
+                else
+                {
+                    c.Enabled = false;
+                }
+            }
+            dgv.Enabled = true;
+        }
+        void Form_Mode(string mode)
+        {
+            switch (mode)
+            {
+                #region New
+                case "New":
+                    btn_New.Visible = false;
+                    btn_Edit.Visible = false;
+                    btn_Save.Visible = true;
+                    btn_Delete.Visible = false;
+                    btn_Cancel.Visible = true;
+
+                    EnableForm();
+                    ClearForm();
+
+                    btn_permissions.Visible = false;
+
+                    txt_aname.Focus();
+                    com_gender_id.SelectedValue = 1;
+                    break;
+                #endregion
+
+                #region Edit
+                case "Edit":
+
+                    btn_New.Visible = false;
+                    btn_Edit.Visible = false;
+                    btn_Save.Visible = true;
+                    btn_Delete.Visible = false;
+                    btn_Cancel.Visible = true;
+
+                    EnableForm();
+
+                    btn_permissions.Visible = false;
+
+                    txt_aname.Select();
+                    break;
+                #endregion
+
+                #region Select
+                case "Select":
+
+                    btn_New.Visible = true;
+                    btn_Edit.Visible = true;
+                    btn_Save.Visible = false;
+                    btn_Delete.Visible = true;
+                    btn_Cancel.Visible = false;
+
+                    DisableForm();
+
+                    btn_permissions.Visible = true;
+                    btn_permissions.Enabled = true;
+
+                    if (dgv.SelectedRows.Count == 0) dgv.CurrentCell = dgv.Rows[0].Cells[0];
+                    foreach (DataRow r in ds.Tables[0].Rows)
+                    {
+                        if (r["ID"].ToString() == dgv.SelectedRows[0].Cells[0].Value.ToString())
+                        {
+                            txt_id.Text = r["id"].ToString();
+                            txt_aname.Text = r["aname"].ToString();
+                            txt_ename.Text = r["ename"].ToString();
+                            txt_password.Text = r["password"].ToString();
+                            com_gender_id.SelectedValue = r["gender_id"].ToString();
+                            txt_jobtitle.Text = r["jobtitle"].ToString();
+                            txt_mobile1.Text = r["mobile1"].ToString();
+                            txt_mobile2.Text = r["mobile2"].ToString();
+                            txt_phone1.Text = r["phone1"].ToString();
+                            txt_phone2.Text = r["phone2"].ToString();
+                            txt_email.Text = r["email"].ToString();
+                            com_permission_id.SelectedValue = r["permission_id"].ToString();
+                            txt_allowedcompanies_ids.Text = r["blockedcompanies_ids"].ToString();
+                            txt_allowedbranches_ids.Text = r["blockedbranches_ids"].ToString();
+                            txt_allowedstores_ids.Text = r["blockedstores_ids"].ToString();
+                            txt_allowedfyears_ids.Text = r["blockedfyears_ids"].ToString();
+                            com_defaultcompany_id.SelectedValue = r["defaultcompany_id"].ToString();
+                            com_defaultbranch_id.SelectedValue = r["defaultbranch_id"].ToString();
+                            com_defaultstore_id.SelectedValue = r["defaultstore_id"].ToString();
+                            com_defaultfyear_id.SelectedValue = r["defaultfyear_id"].ToString();
+                            txt_notes.Text = r["notes"].ToString();
+                            chk_stop.Checked = Convert.ToBoolean(r["stop"]);
+                            lbl_creationtime.Text = r["creationtime"].ToString();
+                            lbl_editingtime.Text = r["editingtime"].ToString();
+                            lbl_createuser_id.Text = r["createuser_id"].ToString();
+                            lbl_edituser_id.Text = r["edituser_id"].ToString();
+                            if (r["edit"].ToString() != "0")
+                            {
+                                btn_info.Visible = true;
+                                btn_info.Text = "معدل" + r["edit"].ToString();
+                            }
+                            else
+                            {
+                                btn_info.Visible = false;
+                                btn_info.Text = "";
+                            }
+                        }
+                    }
+
+                    break;
+                #endregion
+
+                #region Empty
+                case "Empty":
+
+                    btn_New.Visible = true;
+                    btn_Edit.Visible = false;
+                    btn_Save.Visible = false;
+                    btn_Delete.Visible = false;
+                    btn_Cancel.Visible = false;
+
+                    DisableForm();
+                    ClearForm();
+
+                    btn_permissions.Visible = false;
+
+                    if (dgv.CurrentRow != null) dgv.CurrentRow.Selected = false;
+                    break;
+                    #endregion
+            }
+        }
+        string[] TextToArray(string t)
+        {
+            List<string> lst = t.Split(new[] { "," }, StringSplitOptions.None).ToList();
+
+            string[] a = lst.ToArray();
+            return a;
+        }
+        void Bind()
+        {
+            module.id = txt_id.Text.Trim();
+            module.aname = txt_aname.Text.Trim();
+            module.ename = txt_ename.Text.Trim();
+            module.password = txt_password.Text.Trim();
+            module.gender_id = (com_gender_id.SelectedValue != null) ? Convert.ToInt32(com_gender_id.SelectedValue) : 1;
+            module.jobtitle = txt_jobtitle.Text.Trim();
+            module.mobile1 = txt_mobile1.Text.Trim();
+            module.mobile2 = txt_mobile2.Text.Trim();
+            module.phone1 = txt_phone1.Text.Trim();
+            module.phone2 = txt_phone2.Text.Trim();
+            module.email = txt_email.Text.Trim();
+            module.permission_id = (com_permission_id.SelectedValue != null) ? com_permission_id.SelectedValue.ToString() : string.Empty;
+            module.blockedcompanies_ids = txt_allowedcompanies_ids.Text.Trim();
+            module.blockedbranches_ids = txt_allowedbranches_ids.Text.Trim();
+            module.blockedstores_ids = txt_allowedstores_ids.Text.Trim();
+            module.blockedfyears_ids = txt_allowedfyears_ids.Text.Trim();
+            module.defaultcompany_id = (com_defaultcompany_id.SelectedValue != null) ? com_defaultcompany_id.SelectedValue.ToString() : string.Empty;
+            module.defaultbranch_id = (com_defaultbranch_id.SelectedValue != null) ? com_defaultbranch_id.SelectedValue.ToString() : string.Empty;
+            module.defaultstore_id = (com_defaultstore_id.SelectedValue != null) ? com_defaultstore_id.SelectedValue.ToString() : string.Empty;
+            module.defaultfyear_id = (com_defaultfyear_id.SelectedValue != null) ? com_defaultfyear_id.SelectedValue.ToString() : string.Empty;
+            module.notes = txt_notes.Text.Trim();
+            module.stop = chk_stop.Checked;
+            module.activetime = null;
+            module.user_id = frm_main.com_users.SelectedValue.ToString();
+            module.company_id = frm_main.com_companies.SelectedValue.ToString();
+            module.branch_id = frm_main.com_branches.SelectedValue.ToString();
+        }
+        void Refresh_Data()
+        {
+            module.company_id = frm_main.com_companies.SelectedValue.ToString();
+            module.branch_id = frm_main.com_branches.SelectedValue.ToString();
+            ds = module.Select();
+            dgv.DataSource = ds.Tables[0];
+
+            com_gender_id.DataSource = ds.Tables["gender"];
+            com_gender_id.ValueMember = "id";
+            com_gender_id.DisplayMember = "aname";
+
+            com_defaultcompany_id.DataSource = ds.Tables[2];
+            com_defaultcompany_id.ValueMember = "id";
+            com_defaultcompany_id.DisplayMember = "aname";
+
+            com_defaultbranch_id.DataSource = ds.Tables[3];
+            com_defaultbranch_id.ValueMember = "id";
+            com_defaultbranch_id.DisplayMember = "aname";
+
+            com_defaultstore_id.DataSource = ds.Tables[4];
+            com_defaultstore_id.ValueMember = "id";
+            com_defaultstore_id.DisplayMember = "aname";
+
+            com_defaultfyear_id.DataSource = ds.Tables[5];
+            com_defaultfyear_id.ValueMember = "id";
+            com_defaultfyear_id.DisplayMember = "aname";
+
+            if (dgv.Rows.Count > 0)
+            {
+                dgv.CurrentCell = dgv.Rows[0].Cells[0];
+                Tag = "Select";
+                Form_Mode("Select");
+            }
+            else
+            {
+                Tag = "Empty";
+                Form_Mode("Empty");
+            }
+        }
+        void ControlsName()
+        {
+            string s = this.Name.ToString().Substring(4);
+            string tabindex = "";
+            foreach (Control c in gbx_Details.Controls)
+            {
+                if (c is TextBox || c is ComboBox || c is CheckBox)
+                {
+                    tabindex = (c.TabIndex > 9) ? c.TabIndex.ToString() : "0" + c.TabIndex.ToString();
+                    s += ",";
+                    s += tabindex + "- " + c.Name.ToString();
+                }
+            }
+            s += ",96- lbl_creationtime";
+            s += ",97- lbl_editingtime";
+            s += ",98- lbl_createuser_id";
+            s += ",99- lbl_edituser_id";
+            String[] a = s.Split(',');
+            Array.Sort(a);
+            s = string.Join(",", a);
+
+            if (MessageBox.Show(s, "Click OK to copy", MessageBoxButtons.OKCancel) == System.Windows.Forms.DialogResult.OK)
+            { Clipboard.SetText(s); }
+        }
+        #endregion
+
+        #region Controls
+        #region display
+        private void btn_New_MouseEnter(object sender, EventArgs e)
+        {
+            btn_New.FlatStyle = FlatStyle.Popup;
+        }
+        private void btn_New_MouseLeave(object sender, EventArgs e)
+        {
+            btn_New.FlatStyle = FlatStyle.Flat;
+        }
+        private void btn_Edit_MouseEnter(object sender, EventArgs e)
+        {
+            btn_Edit.FlatStyle = FlatStyle.Popup;
+        }
+        private void btn_Edit_MouseLeave(object sender, EventArgs e)
+        {
+            btn_Edit.FlatStyle = FlatStyle.Flat;
+        }
+        private void btn_Save_MouseEnter(object sender, EventArgs e)
+        {
+            btn_Save.FlatStyle = FlatStyle.Popup;
+        }
+        private void btn_Save_MouseLeave(object sender, EventArgs e)
+        {
+            btn_Save.FlatStyle = FlatStyle.Flat;
+        }
+        private void btn_Delete_MouseEnter(object sender, EventArgs e)
+        {
+            btn_Delete.FlatStyle = FlatStyle.Popup;
+        }
+        private void btn_Delete_MouseLeave(object sender, EventArgs e)
+        {
+            btn_Delete.FlatStyle = FlatStyle.Flat;
+        }
+        private void btn_Cancel_MouseEnter(object sender, EventArgs e)
+        {
+            btn_Cancel.FlatStyle = FlatStyle.Popup;
+        }
+        private void btn_Cancel_MouseLeave(object sender, EventArgs e)
+        {
+            btn_Cancel.FlatStyle = FlatStyle.Flat;
+        }
+        #endregion
+        private void btn_New_Click(object sender, EventArgs e)
+        {
+            if (!frm_main.Perm("0106002"))
+            {
+                MessageBox.Show("ليس لديك تصريح لاضافة مستخدم جديد", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+            Tag = "New";
+            Form_Mode("New");
+        }
+        private void btn_Edit_Click(object sender, EventArgs e)
+        {
+            if (!frm_main.Perm("0106003"))
+            {
+                MessageBox.Show("ليس لديك تصريح لتعديل بيانات مستخدم", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+            Tag = "Edit";
+            Form_Mode("Edit");
+            record_index = dgv.SelectedRows[0].Index;
+        }
+        private void btn_Save_Click(object sender, EventArgs e)
+        {
+            #region Validation
+            if (txt_aname.Text.Trim() == "" && txt_ename.Text.Trim() == "")
+            {
+                MessageBox.Show("يجب إدخال الأسم ", "حفظ البيان", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+                txt_aname.Focus();
+                return;
+            }
+            #endregion
+
+            Bind();
+
+            #region New
+            if (Tag.ToString() == "New")
+            {
+                ds = module.Insert();
+                if (ds.Tables[0].Rows.Count > 0)
+                {
+                    if (ds.Tables[0].Rows[0]["notes"] != null)
+                    {
+                        if (ds.Tables[0].Rows[0]["notes"].ToString().Trim().Length >= 10)
+                        {
+                            if (ds.Tables[0].Rows[0]["notes"].ToString().Substring(0, 10) == "PostgreSQL")
+                            {
+                                string[] arrey = ds.Tables[0].Rows[0]["notes"].ToString().Split(',');
+                                MessageBox.Show(arrey[1] + "\r\n" + arrey[2] + "\r\n" + arrey[3] + "\r\n" + arrey[4], arrey[0]);
+                                return;
+                            }
+                        }
+                    }
+                }
+                dgv.DataSource = ds.Tables[0];
+                if (dgv.RowCount > 0) dgv.CurrentCell = dgv.Rows[dgv.RowCount - 1].Cells[0];
+                dgv.Focus();
+            }
+            #endregion
+
+            #region Edit
+            else if (Tag.ToString() == "Edit")
+            {
+                ds = module.Update();
+                if (ds.Tables[0].Rows.Count > 0)
+                {
+                    if (ds.Tables[0].Rows[0]["notes"] != null)
+                    {
+                        if (ds.Tables[0].Rows[0]["notes"].ToString().Trim().Length >= 10)
+                        {
+                            if (ds.Tables[0].Rows[0]["notes"].ToString().Substring(0, 10) == "PostgreSQL")
+                            {
+                                string[] arrey = ds.Tables[0].Rows[0]["notes"].ToString().Split(',');
+                                MessageBox.Show(arrey[1] + "\r\n" + arrey[2] + "\r\n" + arrey[3] + "\r\n" + arrey[4], arrey[0]);
+                                return;
+                            }
+                        }
+                    }
+                }
+                dgv.DataSource = ds.Tables[0];
+                dgv.CurrentCell = dgv.Rows[record_index].Cells[0];
+            }
+            Tag = "Select";
+            Form_Mode("Select");
+            #endregion
+        }
+        private void btn_Delete_Click(object sender, EventArgs e)
+        {
+            if (!frm_main.Perm("0106004"))
+            {
+                MessageBox.Show("ليس لديك تصريح لحذف مستخدم", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+            if (MessageBox.Show("هل بالفعل تريد الحذف ؟", "حذف", MessageBoxButtons.YesNo, MessageBoxIcon.Asterisk) == DialogResult.No)
+            {
+                return;
+            }
+
+            Bind();
+            ds = module.Delete();
+            if (ds.Tables[0].Rows.Count > 0)
+            {
+                if (ds.Tables[0].Rows[0]["notes"] != null)
+                {
+                    if (ds.Tables[0].Rows[0]["notes"].ToString().Trim().Length >= 10)
+                    {
+                        if (ds.Tables[0].Rows[0]["notes"].ToString().Substring(0, 10) == "PostgreSQL")
+                        {
+                            string[] arrey = ds.Tables[0].Rows[0]["notes"].ToString().Split(',');
+                            MessageBox.Show(arrey[1] + "\r\n" + arrey[2] + "\r\n" + arrey[3] + "\r\n" + arrey[4], arrey[0]);
+                            return;
+                        }
+                    }
+                }
+            }
+            dgv.DataSource = ds.Tables[0];
+
+            Tag = "Empty";
+            Form_Mode("Empty");
+        }
+        private void btn_Cancel_Click(object sender, EventArgs e)
+        {
+            if (Tag.ToString() == "New")
+            {
+                Tag = "Empty";
+                Form_Mode("Empty");
+            }
+            else if (Tag.ToString() == "Edit")
+            {
+                Tag = "Select";
+                Form_Mode("Select");
+            }
+        }
+        #endregion
+
+        #region dgv
+        private void dgv_SelectionChanged(object sender, EventArgs e)
+        {
+            if (Tag == null || dgv.Focused == false) return;
+            if (Tag.ToString() == "Select" || Tag.ToString() == "Empty")
+            {
+                Tag = "Select";
+                Form_Mode("Select");
+            }
+        }
+        #endregion
+
+        private void btn_permissions_Click(object sender, EventArgs e)
+        {
+            if (!frm_main.Perm("0106005"))
+            {
+                MessageBox.Show("ليس لديك تصريح لتعديل صلاحيات مستخدم", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+            pro_view.fld_PL.fld_General_Settings.frm_permissions f = new fld_PL.fld_General_Settings.frm_permissions();
+            f.frm_main = frm_main;
+            f.txt_id.Text = txt_id.Text;
+            f.txt_aname.Text = txt_aname.Text;
+            f.Text = "الصلاحيات";
+            f.ShowDialog();
+            
+        }
+    }
+}

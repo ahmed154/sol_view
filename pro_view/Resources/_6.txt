@@ -1,0 +1,660 @@
+DROP FUNCTION IF EXISTS  acc.fnc_cout_insert(character varying, text, character varying, character varying, character varying, character varying, character varying, timestamp without time zone, character varying, json);
+DROP FUNCTION IF EXISTS  acc.fnc_cout_update(character varying, text, character varying, character varying, character varying, character varying, character varying, timestamp without time zone, character varying, json);
+DROP FUNCTION IF EXISTS  acc.fnc_cout_delete(character varying, character varying, character varying);
+DROP VIEW IF EXISTS  acc.viw_cout_select;
+DROP TABLE IF EXISTS  acc.tbl_coutd;
+DROP TABLE IF EXISTS  acc.tbl_cout;
+insert into grl.tbl_doctype (id, aname, ename, schema, moudel_id) values (20, '”‰œ ’—›', 'Payment Voucher', 'acc', '02') 
+on conflict (id) do nothing;
+
+
+CREATE TABLE acc.tbl_cout
+(
+    id character varying(10) COLLATE pg_catalog."default" NOT NULL,
+    sequ integer NOT NULL,
+    jor_id character varying(15) COLLATE pg_catalog."default",
+    notes text COLLATE pg_catalog."default",
+    posted boolean NOT NULL DEFAULT false,
+    frozen boolean NOT NULL DEFAULT false,
+    closed boolean NOT NULL DEFAULT false,
+    creationtime timestamp without time zone NOT NULL,
+    createservertime timestamp without time zone NOT NULL,
+    createuser_id character varying(4) COLLATE pg_catalog."default" NOT NULL,
+    edit smallint NOT NULL DEFAULT 0,
+    cc1_id character varying(50) COLLATE pg_catalog."default",
+    cc2_id character varying(50) COLLATE pg_catalog."default",
+    fyear_id character varying(2) COLLATE pg_catalog."default",
+    branch_id character varying(3) COLLATE pg_catalog."default",
+    company_id character varying(2) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT pky_cout PRIMARY KEY (id, company_id),
+    CONSTRAINT fky_cout_branchid_branches_id FOREIGN KEY (branch_id, company_id)
+        REFERENCES grl.tbl_branches (id, company_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_cout_cc1id_cc_id FOREIGN KEY (company_id, cc1_id)
+        REFERENCES acc.tbl_cc (company_id, id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_cout_cc2id_cc_id FOREIGN KEY (cc2_id, company_id)
+        REFERENCES acc.tbl_cc (id, company_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_cout_companyid_companies_id FOREIGN KEY (company_id)
+        REFERENCES grl.tbl_companies (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_cout_fyearid_fyears_id FOREIGN KEY (fyear_id)
+        REFERENCES grl.tbl_fyears (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_cout_jorid_jor_id FOREIGN KEY (company_id, jor_id)
+        REFERENCES acc.tbl_jor (company_id, id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+);
+-------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------
+CREATE TABLE acc.tbl_coutd
+(
+    cout_id character varying(10) COLLATE pg_catalog."default" NOT NULL,
+    jor_id character varying(15) COLLATE pg_catalog."default",
+    amount numeric NOT NULL DEFAULT 0,
+    chart_cin_id text COLLATE pg_catalog."default" NOT NULL,
+    chart_cout_id text COLLATE pg_catalog."default" NOT NULL,
+    notes text COLLATE pg_catalog."default",
+    paytype_id smallint NOT NULL,
+    bank_id smallint NOT NULL,
+    checkcardno text COLLATE pg_catalog."default",
+    checkcarddate date,
+    sorno text COLLATE pg_catalog."default",
+    salno text COLLATE pg_catalog."default",
+    billdate date,
+    manualno text COLLATE pg_catalog."default",
+    currency_id character varying(2) COLLATE pg_catalog."default" NOT NULL,
+    currencyprice numeric NOT NULL DEFAULT 1,
+    posted boolean NOT NULL DEFAULT false,
+    frozen boolean NOT NULL DEFAULT false,
+    closed boolean NOT NULL DEFAULT false,
+    creationtime timestamp without time zone NOT NULL,
+    createservertime timestamp without time zone NOT NULL,
+    createuser_id character varying(4) COLLATE pg_catalog."default" NOT NULL,
+    edit smallint NOT NULL DEFAULT 0,
+    cc1_id character varying(50) COLLATE pg_catalog."default",
+    cc2_id character varying(50) COLLATE pg_catalog."default",
+    fyear_id character varying(2) COLLATE pg_catalog."default",
+    branch_id character varying(3) COLLATE pg_catalog."default",
+    company_id character varying(2) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT fky_coutd_bank_id_paytype_id FOREIGN KEY (bank_id)
+        REFERENCES grl.tbl_bank (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_coutd_branchid_branches_id FOREIGN KEY (branch_id, company_id)
+        REFERENCES grl.tbl_branches (id, company_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_coutd_cc1id_cc_id FOREIGN KEY (company_id, cc1_id)
+        REFERENCES acc.tbl_cc (company_id, id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_coutd_cc2id_cc_id FOREIGN KEY (cc2_id, company_id)
+        REFERENCES acc.tbl_cc (id, company_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_coutd_chartinid_chart_id FOREIGN KEY (chart_cin_id, company_id)
+        REFERENCES acc.tbl_chart (id, company_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_coutd_chartcoutid_chart_id FOREIGN KEY (chart_cout_id, company_id)
+        REFERENCES acc.tbl_chart (id, company_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_coutd_coutid_cout_id FOREIGN KEY (cout_id, company_id)
+        REFERENCES acc.tbl_cout (id, company_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_coutd_companyid_companies_id FOREIGN KEY (company_id)
+        REFERENCES grl.tbl_companies (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_coutd_currencyid_currencies_id FOREIGN KEY (currency_id)
+        REFERENCES grl.tbl_currencies (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_coutd_fyearid_fyears_id FOREIGN KEY (fyear_id)
+        REFERENCES grl.tbl_fyears (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_coutd_jorid_jor_id FOREIGN KEY (jor_id, company_id)
+        REFERENCES acc.tbl_jor (id, company_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fky_coutd_paytype_id_paytype_id FOREIGN KEY (paytype_id)
+        REFERENCES grl.tbl_paytype (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+);
+--------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE VIEW acc.viw_cout_select AS
+ SELECT h.id AS h_id,
+    h.sequ AS h_sequ,
+    h.notes AS h_notes,
+    h.jor_id AS h_jor_id,
+    h.posted AS h_posted,
+    h.frozen AS h_frozen,
+    h.closed AS h_closed,
+    h.creationtime AS h_creationtime,
+    h.createservertime AS h_createservertime,
+    h.createuser_id AS h_createuser_id,
+    h.edit AS h_edit,
+    h.cc1_id AS h_cc1_id,
+    h.cc2_id AS h_cc2_id,
+    h.fyear_id AS h_fyear_id,
+    h.branch_id AS h_branch_id,
+    h.company_id AS h_company_id,
+    d.cout_id AS d_cout_id,
+    d.jor_id AS d_jor_id,
+    d.amount AS d_amount,
+    d.chart_cout_id AS d_chart_cin_id,
+    chartin.aname AS d_chart_cin_aname,
+    chartin.ename AS d_chart_cin_ename,
+    d.chart_cout_id AS d_chart_cout_id,
+    chartout.aname AS d_chart_cout_aname,
+    chartout.ename AS d_chart_cout_ename,
+    d.notes AS d_notes,
+    d.paytype_id AS d_paytype_id,
+    paytype.aname AS d_paytype_aname,
+    paytype.ename AS d_paytype_ename,
+    d.bank_id AS d_bank_id,
+    bank.aname AS d_bank_aname,
+    bank.ename AS d_bank_ename,
+    d.checkcardno AS d_checkcardno,
+    d.checkcarddate AS d_checkcarddate,
+    d.sorno AS d_sorno,
+    d.salno AS d_salno,
+    d.billdate AS d_billdate,
+    d.manualno AS d_manualno,
+    d.currency_id AS d_currency_id,
+    currency.aname AS d_currency_aname,
+    currency.ename AS d_currency_ename,
+    d.currencyprice AS d_currency_price,
+    d.posted AS d_posted,
+    d.frozen AS d_frozen,
+    d.closed AS d_closed,
+    d.creationtime AS d_creationtime,
+    d.createservertime AS d_createservertime,
+    d.createuser_id AS d_createuser_id,
+    d.edit AS d_edit,
+    d.cc1_id AS d_cc1_id,
+    cc1.aname AS d_cc1_aname,
+    cc1.ename AS d_cc1_ename,
+    d.cc2_id AS d_cc2_id,
+    cc2.aname AS d_cc2_aname,
+    cc2.ename AS d_cc2_ename,
+    d.fyear_id AS d_fyear_id,
+    d.branch_id AS d_branch_id,
+    branch.aname AS d_branch_aname,
+    branch.ename AS d_branch_ename,
+    d.company_id AS d_company_id
+   FROM acc.tbl_coutd d
+     LEFT JOIN acc.tbl_cout h ON d.cout_id::text = h.id::text
+     LEFT JOIN acc.tbl_chart chartin ON d.chart_cin_id = chartin.id::text
+     LEFT JOIN acc.tbl_chart chartout ON d.chart_cout_id = chartout.id::text
+     LEFT JOIN grl.tbl_paytype paytype ON d.paytype_id = paytype.id
+     LEFT JOIN grl.tbl_bank bank ON d.bank_id = bank.id
+     LEFT JOIN grl.tbl_currencies currency ON d.currency_id::text = currency.id::text
+     LEFT JOIN acc.tbl_cc cc1 ON d.cc1_id::text = cc1.id::text
+     LEFT JOIN acc.tbl_cc cc2 ON d.cc2_id::text = cc2.id::text
+     LEFT JOIN grl.tbl_branches branch ON d.branch_id::text = branch.id::text
+  WHERE branch.company_id::text = d.company_id::text
+  ORDER BY d.ctid;
+--------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------
+            CREATE OR REPLACE FUNCTION acc.fnc_cout_insert(
+    in_id character varying,
+    in_notes text,
+    in_company_id character varying,
+    in_fyear_id character varying,
+    in_branch_id character varying,
+    in_cc1_id character varying,
+    in_cc2_id character varying,
+    in_creationtime timestamp without time zone,
+    in_user_id character varying,
+    in_coutd json)
+    RETURNS SETOF acc.viw_cout_select
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE
+    ROWS 1000
+AS $BODY$
+
+declare
+    on_servertime timestamp;
+            on_sequ smallint;
+            on_xsequ text;
+            on_audit_id bigint;
+            -------------------------------------------
+                i jsonb;
+            on_coutD_amount numeric;
+            on_coutD_chart_cin_id text;
+            on_coutD_chart_cout_id text;
+            on_coutD_notes text;
+            on_coutD_paytype_id smallint;
+            on_coutD_bank_id smallint;
+
+            on_coutD_checkcardno text;
+            on_coutD_checkcarddate timestamp;
+            on_coutD_sorno text;
+            on_coutD_salno text;
+            on_coutD_billdate timestamp;
+            on_coutD_manualno text;
+            on_coutD_currency_id text;
+            on_coutD_currencyprice numeric;
+
+            on_coutD_cc1_id text;
+            on_coutD_cc2_id text;
+            on_coutD_branch_id text;
+            --------------------------------------------
+                ex_id integer;
+            ex_sqlstate text;
+            ex_colname text;
+            ex_constraintname text;
+            ex_datatype text;
+            ex_msgtext text;
+            ex_tablename text;
+            ex_schemaname text;
+            ex_details text;
+            ex_hint text;
+            ex_context text;
+            BEGIN
+                ex_id = (select(select max(id) from grl.tbl_ex) + 1); if ex_id is null then ex_id = 1; end if;
+            on_audit_id = (select(select max(id) from grl.tbl_audit) + 1); if on_audit_id is null then on_audit_id = 1; end if;
+            on_servertime = (select(current_timestamp));
+
+            on_sequ = (select(select max(sequ) from acc.tbl_cout
+                              WHERE branch_id = in_branch_id
+
+                              AND company_id = in_company_id
+                             ) + 1);
+
+            on_sequ = (select case when(on_sequ is NULL) then 1 else on_sequ end);
+            on_xsequ = on_sequ::text;
+
+            WHILE(length(on_xsequ) < 7)
+
+        loop
+            on_xsequ = (select concat('0', on_xsequ));
+            end loop;
+
+            in_id = (in_branch_id || on_xsequ);
+            ------------------------------------------------------------------------------------------------------INSERT INTO cout
+INSERT INTO acc.tbl_cout(
+    id, sequ, notes, creationtime, createservertime, createuser_id, cc1_id, cc2_id, fyear_id, branch_id, company_id)
+
+    VALUES(
+        in_id,
+        on_sequ,
+        in_notes,
+        in_creationtime,
+        on_servertime,
+        in_user_id,
+        in_cc1_id,
+        in_cc2_id,
+        in_fyear_id,
+        in_branch_id,
+        in_company_id);
+            ------------------------------------------------------------------------------------------------------INSERT INTO coutD
+FOR i IN SELECT *FROM json_array_elements(in_coutd)
+  LOOP
+
+    on_coutD_amount := i->> 'amount';
+            on_coutD_chart_cin_id:= i->> 'chart_cin_id';
+            on_coutD_chart_cout_id:= i->> 'chart_cout_id';
+            on_coutD_notes:= i->> 'notes';
+            on_coutD_paytype_id:= i->> 'paytype_id';
+            on_coutD_bank_id:= i->> 'bank_id';
+            on_coutD_checkcardno:= i->> 'checkcardno';
+            on_coutD_checkcarddate:= i->> 'checkcarddate';
+            on_coutD_sorno:= i->> 'sorno';
+            on_coutD_salno:= i->> 'salno';
+            on_coutD_billdate:= i->> 'billdate';
+            on_coutD_manualno:= i->> 'manualno';
+            on_coutD_currency_id:= i->> 'currency_id';
+            on_coutD_currencyprice:= i->> 'currency_price';
+            on_coutD_cc1_id:= i->> 'cc1_id';
+            on_coutD_cc2_id:= i->> 'cc2_id';
+            on_coutD_branch_id:= i->> 'branch_id';
+
+            on_coutD_cc1_id = (select case when(on_coutD_cc1_id IS NULL OR on_coutD_cc1_id = '') THEN in_cc1_id else on_coutD_cc1_id end);
+            on_coutD_cc2_id = (select case when(on_coutD_cc2_id IS NULL OR on_coutD_cc2_id = '') THEN in_cc2_id else on_coutD_cc2_id end);
+            on_coutD_branch_id = (select case when(on_coutD_branch_id IS NULL OR on_coutD_branch_id = '') THEN in_branch_id else on_coutD_branch_id end);
+
+            INSERT INTO acc.tbl_coutd(
+            cout_id, amount, chart_cin_id, chart_cout_id, notes, paytype_id, bank_id, checkcardno, checkcarddate, sorno, salno, billdate,
+                manualno, currency_id, currencyprice, creationtime, createservertime, createuser_id,
+                cc1_id, cc2_id, fyear_id, branch_id, company_id)
+
+
+    VALUES(
+    in_id,
+    on_coutD_amount,
+    on_coutD_chart_cin_id,
+    on_coutD_chart_cout_id,
+    on_coutD_notes,
+    on_coutD_paytype_id,
+    on_coutD_bank_id,
+    on_coutD_checkcardno,
+    on_coutD_checkcarddate,
+    on_coutD_sorno,
+    on_coutD_salno,
+    on_coutD_billdate,
+    on_coutD_manualno,
+    on_coutD_currency_id,
+    on_coutD_currencyprice,
+    in_creationtime,
+    on_servertime,
+    in_user_id,
+    on_coutD_cc1_id,
+    on_coutD_cc2_id,
+    in_fyear_id,
+    on_coutD_branch_id,
+    in_company_id
+    );
+
+            END LOOP;
+            ------------------------------------------------------------------------------------------------------INSERT INTO audit
+INSERT INTO grl.tbl_audit(
+    id, eventtime, eventtype_id, doctype_id, doc_id, user_id, company_id)
+
+    VALUES(on_audit_id, on_servertime, 60, 20, in_id, in_user_id, in_company_id);
+            ------------------------------------------------------------------------------------------------------Success Return
+            RETURN QUERY select *from acc.viw_cout_Select where h_id = in_id;
+            ------------------------------------------------------------------------------------------------------EX
+EXCEPTION WHEN OTHERS THEN
+
+    GET STACKED DIAGNOSTICS
+        ex_sqlstate = RETURNED_SQLSTATE,
+        ex_colname = COLUMN_NAME,
+        ex_constraintname = CONSTRAINT_NAME,
+        ex_datatype = PG_DATATYPE_NAME,
+        ex_msgtext = MESSAGE_TEXT,
+        ex_tablename = TABLE_NAME,
+        ex_schemaname = SCHEMA_NAME,
+        ex_details = PG_EXCEPTION_DETAIL,
+        ex_hint = PG_EXCEPTION_HINT,
+        ex_context = PG_EXCEPTION_CONTEXT;
+            DROP TABLE IF EXISTS temp_EX;
+            CREATE TEMP TABLE temp_EX as SELECT* from acc.viw_cout_Select where h_id = '0';
+            INSERT INTO temp_EX(h_notes)VALUES('PostgreSQL' || ',' || ex_id || ',' || ex_sqlstate || ',' || ex_msgtext || ',' || ex_context);
+            ------------------------------------------------------------------------------------------------------INSERT INTO ex
+INSERT INTO grl.tbl_ex(
+id, sqlstate, colname, constraintname, datatype, msgtext, tablename, schemaname, details, hint, context, extime, company_id, branche_id, store_id, user_id, eventtype_id, doc_id)
+VALUES(ex_id, ex_sqlstate, ex_colname, ex_constraintname, ex_datatype, ex_msgtext, ex_tablename, ex_schemaname, ex_details, ex_hint, ex_context, on_servertime, in_company_id, in_branch_id, null, in_user_id, 60, in_id);
+            ------------------------------------------------------------------------------------------------------Faild Return
+return QUERY select* from temp_EX;
+            End
+
+$BODY$;
+-------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------
+           CREATE OR REPLACE FUNCTION acc.fnc_cout_update(
+    in_id character varying,
+    in_notes text,
+    in_company_id character varying,
+    in_fyear_id character varying,
+    in_branch_id character varying,
+    in_cc1_id character varying,
+    in_cc2_id character varying,
+    in_creationtime timestamp without time zone,
+    in_user_id character varying,
+    in_coutd json)
+    RETURNS SETOF acc.viw_cout_select
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE
+    ROWS 1000
+AS $BODY$
+
+declare
+    on_servertime timestamp;
+            on_sequ smallint;
+            on_xsequ text;
+            on_audit_id bigint;
+            -------------------------------------------
+                i jsonb;
+            on_coutD_amount numeric;
+            on_coutD_chart_cin_id text;
+            on_coutD_chart_cout_id text;
+            on_coutD_notes text;
+            on_coutD_paytype_id smallint;
+            on_coutD_bank_id smallint;
+
+            on_coutD_checkcardno text;
+            on_coutD_checkcarddate timestamp;
+            on_coutD_sorno text;
+            on_coutD_salno text;
+            on_coutD_billdate timestamp;
+            on_coutD_manualno text;
+            on_coutD_currency_id text;
+            on_coutD_currencyprice numeric;
+
+            on_coutD_cc1_id text;
+            on_coutD_cc2_id text;
+            on_coutD_branch_id text;
+            --------------------------------------------
+                ex_id integer;
+            ex_sqlstate text;
+            ex_colname text;
+            ex_constraintname text;
+            ex_datatype text;
+            ex_msgtext text;
+            ex_tablename text;
+            ex_schemaname text;
+            ex_details text;
+            ex_hint text;
+            ex_context text;
+            BEGIN
+                ex_id = (select(select max(id) from grl.tbl_ex) + 1); if ex_id is null then ex_id = 1; end if;
+            on_audit_id = (select(select max(id) from grl.tbl_audit) + 1); if on_audit_id is null then on_audit_id = 1; end if;
+            on_servertime = (select(current_timestamp));
+
+            on_sequ = (select(select max(sequ) from acc.tbl_cout
+                              WHERE branch_id = in_branch_id
+
+                              AND company_id = in_company_id
+                             ) + 1);
+
+            on_sequ = (select case when(on_sequ is NULL) then 1 else on_sequ end);
+            on_xsequ = on_sequ::text;
+
+            ------------------------------------------------------------------------------------------------------DELETE FROM acc.tbl_coutd & cout
+DELETE FROM acc.tbl_coutd WHERE cout_id = in_id AND company_id = in_company_id;
+            DELETE FROM acc.tbl_cout WHERE id = in_id AND company_id = in_company_id;
+            ------------------------------------------------------------------------------------------------------INSERT INTO cout
+INSERT INTO acc.tbl_cout(
+    id, sequ, notes, creationtime, createservertime, createuser_id, cc1_id, cc2_id, fyear_id, branch_id, company_id)
+
+    VALUES(
+        in_id,
+        on_sequ,
+        in_notes,
+        in_creationtime,
+        on_servertime,
+        in_user_id,
+        in_cc1_id,
+        in_cc2_id,
+        in_fyear_id,
+        in_branch_id,
+        in_company_id);
+            ------------------------------------------------------------------------------------------------------INSERT INTO coutD
+FOR i IN SELECT *FROM json_array_elements(in_coutd)
+  LOOP
+
+    on_coutD_amount := i->> 'amount';
+            on_coutD_chart_cin_id:= i->> 'chart_cin_id';
+            on_coutD_chart_cout_id:= i->> 'chart_cout_id';
+            on_coutD_notes:= i->> 'notes';
+            on_coutD_paytype_id:= i->> 'paytype_id';
+            on_coutD_bank_id:= i->> 'bank_id';
+            on_coutD_checkcardno:= i->> 'checkcardno';
+            on_coutD_checkcarddate:= i->> 'checkcarddate';
+            on_coutD_sorno:= i->> 'sorno';
+            on_coutD_salno:= i->> 'salno';
+            on_coutD_billdate:= i->> 'billdate';
+            on_coutD_manualno:= i->> 'manualno';
+            on_coutD_currency_id:= i->> 'currency_id';
+            on_coutD_currencyprice:= i->> 'currency_price';
+            on_coutD_cc1_id:= i->> 'cc1_id';
+            on_coutD_cc2_id:= i->> 'cc2_id';
+            on_coutD_branch_id:= i->> 'branch_id';
+
+            on_coutD_cc1_id = (select case when(on_coutD_cc1_id IS NULL OR on_coutD_cc1_id = '') THEN in_cc1_id else on_coutD_cc1_id end);
+            on_coutD_cc2_id = (select case when(on_coutD_cc2_id IS NULL OR on_coutD_cc2_id = '') THEN in_cc2_id else on_coutD_cc2_id end);
+            on_coutD_branch_id = (select case when(on_coutD_branch_id IS NULL OR on_coutD_branch_id = '') THEN in_branch_id else on_coutD_branch_id end);
+
+            INSERT INTO acc.tbl_coutd(
+            cout_id, amount, chart_cin_id, chart_cout_id, notes, paytype_id, bank_id, checkcardno, checkcarddate, sorno, salno, billdate,
+                manualno, currency_id, currencyprice, creationtime, createservertime, createuser_id,
+                cc1_id, cc2_id, fyear_id, branch_id, company_id)
+
+
+    VALUES(
+    in_id,
+    on_coutD_amount,
+    on_coutD_chart_cin_id,
+    on_coutD_chart_cout_id,
+    on_coutD_notes,
+    on_coutD_paytype_id,
+    on_coutD_bank_id,
+    on_coutD_checkcardno,
+    on_coutD_checkcarddate,
+    on_coutD_sorno,
+    on_coutD_salno,
+    on_coutD_billdate,
+    on_coutD_manualno,
+    on_coutD_currency_id,
+    on_coutD_currencyprice,
+    in_creationtime,
+    on_servertime,
+    in_user_id,
+    on_coutD_cc1_id,
+    on_coutD_cc2_id,
+    in_fyear_id,
+    on_coutD_branch_id,
+    in_company_id
+    );
+
+            END LOOP;
+            ------------------------------------------------------------------------------------------------------INSERT INTO audit
+INSERT INTO grl.tbl_audit(
+    id, eventtime, eventtype_id, doctype_id, doc_id, user_id, company_id)
+
+    VALUES(on_audit_id, on_servertime, 61, 20, in_id, in_user_id, in_company_id);
+            ------------------------------------------------------------------------------------------------------Success Return
+            RETURN QUERY select *from acc.viw_cout_Select where h_id = in_id;
+            ------------------------------------------------------------------------------------------------------EX
+EXCEPTION WHEN OTHERS THEN
+
+    GET STACKED DIAGNOSTICS
+        ex_sqlstate = RETURNED_SQLSTATE,
+        ex_colname = COLUMN_NAME,
+        ex_constraintname = CONSTRAINT_NAME,
+        ex_datatype = PG_DATATYPE_NAME,
+        ex_msgtext = MESSAGE_TEXT,
+        ex_tablename = TABLE_NAME,
+        ex_schemaname = SCHEMA_NAME,
+        ex_details = PG_EXCEPTION_DETAIL,
+        ex_hint = PG_EXCEPTION_HINT,
+        ex_context = PG_EXCEPTION_CONTEXT;
+            DROP TABLE IF EXISTS temp_EX;
+            CREATE TEMP TABLE temp_EX as SELECT* from acc.viw_cout_Select where h_id = '0';
+            INSERT INTO temp_EX(h_notes)VALUES('PostgreSQL' || ',' || ex_id || ',' || ex_sqlstate || ',' || ex_msgtext || ',' || ex_context);
+            ------------------------------------------------------------------------------------------------------INSERT INTO ex
+INSERT INTO grl.tbl_ex(
+id, sqlstate, colname, constraintname, datatype, msgtext, tablename, schemaname, details, hint, context, extime, company_id, branche_id, store_id, user_id, eventtype_id, doc_id)
+VALUES(ex_id, ex_sqlstate, ex_colname, ex_constraintname, ex_datatype, ex_msgtext, ex_tablename, ex_schemaname, ex_details, ex_hint, ex_context, on_servertime, in_company_id, in_branch_id, null, in_user_id, 61, in_id);
+            ------------------------------------------------------------------------------------------------------Faild Return
+return QUERY select* from temp_EX;
+            End
+
+$BODY$;
+-----------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------
+          CREATE OR REPLACE FUNCTION acc.fnc_cout_delete(
+               in_id character varying,
+               in_company_id character varying,
+               in_user_id character varying)
+    RETURNS SETOF acc.viw_cout_select
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE
+    ROWS 1000
+AS $BODY$
+
+declare
+    on_edit_id integer;
+            on_jorD_id integer;
+            on_servertime timestamp;
+            on_yyyy text;
+            on_yy text;
+            on_MM text;
+            on_ref text;
+            on_jorRefType text;
+            on_sequ smallint;
+            on_xsequ text;
+            on_audit_id bigint;
+            --------------------------------------------
+                ex_id integer;
+            ex_sqlstate text;
+            ex_colname text;
+            ex_constraintname text;
+            ex_datatype text;
+            ex_msgtext text;
+            ex_tablename text;
+            ex_schemaname text;
+            ex_details text;
+            ex_hint text;
+            ex_context text;
+            BEGIN
+            ex_id = (select(select max(id) from grl.tbl_ex) + 1); if ex_id is null then ex_id = 1; end if;
+            on_audit_id = (select(select max(id) from grl.tbl_audit) + 1); if on_audit_id is null then on_audit_id = 1; end if;
+            on_servertime = (select(current_timestamp));
+            ------------------------------------------------------------------------------------------------------INSERT INTO joredit
+DELETE FROM acc.tbl_coutd WHERE cout_id = in_id AND company_id = in_company_id;
+            DELETE FROM acc.tbl_cout j WHERE id = in_id AND company_id = in_company_id;
+            ------------------------------------------------------------------------------------------------------INSERT INTO audit
+INSERT INTO grl.tbl_audit(
+    id, eventtime, eventtype_id, doctype_id, doc_id, user_id, company_id)
+
+    VALUES(on_audit_id, on_servertime, 62, 10, in_id, in_user_id, in_company_id);
+            ------------------------------------------------------------------------------------------------------Success Return
+            RETURN QUERY select *from acc.viw_cout_Select where h_id = in_id;
+            ------------------------------------------------------------------------------------------------------EX
+EXCEPTION WHEN OTHERS THEN
+
+    GET STACKED DIAGNOSTICS
+        ex_sqlstate = RETURNED_SQLSTATE,
+        ex_colname = COLUMN_NAME,
+        ex_constraintname = CONSTRAINT_NAME,
+        ex_datatype = PG_DATATYPE_NAME,
+        ex_msgtext = MESSAGE_TEXT,
+        ex_tablename = TABLE_NAME,
+        ex_schemaname = SCHEMA_NAME,
+        ex_details = PG_EXCEPTION_DETAIL,
+        ex_hint = PG_EXCEPTION_HINT,
+        ex_context = PG_EXCEPTION_CONTEXT;
+            DROP TABLE IF EXISTS temp_EX;
+            CREATE TEMP TABLE temp_EX as SELECT* from acc.viw_jor_Select where h_id = '0';
+            INSERT INTO temp_EX(h_notes)VALUES('PostgreSQL' || ',' || ex_id || ',' || ex_sqlstate || ',' || ex_msgtext || ',' || ex_context);
+            ------------------------------------------------------------------------------------------------------INSERT INTO ex
+INSERT INTO grl.tbl_ex(
+id, sqlstate, colname, constraintname, datatype, msgtext, tablename, schemaname, details, hint, context, extime, company_id, branche_id, store_id, user_id, eventtype_id, doc_id)
+VALUES(ex_id, ex_sqlstate, ex_colname, ex_constraintname, ex_datatype, ex_msgtext, ex_tablename, ex_schemaname, ex_details, ex_hint, ex_context, on_servertime, in_company_id, null, null, in_user_id, 62, in_id);
+            ------------------------------------------------------------------------------------------------------Faild Return
+return QUERY select* from temp_EX;
+            End
+
+$BODY$;

@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS grl.tbl_system
+(
+    scl boolean NOT NULL DEFAULT 'false'
+);
+
+delete  from grl.tbl_system;
+insert into grl.tbl_system(scl)values('false');

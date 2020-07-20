@@ -1,0 +1,42 @@
+delete from grl.tbl_audit;
+delete from acc.tbl_cind;
+delete from acc.tbl_cin;
+delete from acc.tbl_coutd;
+delete from acc.tbl_cout;
+delete from acc.tbl_jord;
+delete from acc.tbl_jordedit;
+delete from acc.tbl_jor;
+delete from acc.tbl_joredit;
+delete from grl.tbl_currenciesedit;
+update grl.tbl_currencies set edit = 0;
+delete from grl.tbl_ex;
+delete from grl.tbl_fyearsedit;
+delete from grl.tbl_fyears;
+delete from grl.tbl_rep;
+delete from grl.tbl_repd;
+delete from grl.tbl_stores;
+delete from grl.tbl_storesedit;
+delete from grl.tbl_branches;
+delete from grl.tbl_branchesedit;
+
+delete from acc.tbl_cc;
+delete from acc.tbl_ccedit;
+
+delete from grl.tbl_usersedit;
+delete from grl.tbl_users;
+
+delete from grl.tbl_companiesedit;
+delete from grl.tbl_companies;
+
+INSERT INTO grl.tbl_users(id, sequ, aname, ename, password, gender_id, company_id, branch_id, creationtime, createuser_id)
+	VALUES ('0001', 1, 'Demo', 'Demo', '123', 1, '01', '001', '01/01/2019', '0001');
+INSERT INTO grl.tbl_companies(
+	id, sequ, aname, ename, creationtime, createuser_id)
+	VALUES ('01', 1, '«·‘—ﬂ… «·—∆Ì”Ì…', 'Main Company', '01/01/2019', '0001');
+INSERT INTO grl.tbl_fyears(id, sequ, aname, ename, beigndate, enddate,    company_id, branch_id, creationtime,  createuser_id)
+	VALUES ('01', 1, '2019', '2019', '01/01/2019', '12/31/2019', '01', '001', '01/01/2019', '0001');
+INSERT INTO grl.tbl_branches(id, sequ, aname, ename,  company_id, creationtime, createuser_id)
+	VALUES ('001', 1, '«·›—⁄ «·—∆Ì”Ì', 'Main Branch', '01', '01/01/2019', '0001');
+
+
+

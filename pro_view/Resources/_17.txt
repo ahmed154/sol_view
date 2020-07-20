@@ -1,0 +1,216 @@
+DROP FUNCTION IF EXISTS acc.fnc_jorcyc_insert(
+	in_id int,
+	in_currency_id character varying,
+	in_currencyprice numeric,
+	in_jortype_id text,
+	in_notes text,
+	in_cc1_id character varying,
+	in_cc2_id character varying,	
+	in_jord json);
+DROP VIEW IF EXISTS acc.viw_jorcyc_select;
+DROP TABLE IF EXISTS acc.tbl_jordcyc;
+DROP TABLE IF EXISTS acc.tbl_jorcyc;
+--------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
+CREATE TABLE acc.tbl_jorcyc
+(
+    id smallint NOT NULL,
+    currency_id character varying(2) NOT NULL,
+    currencyprice numeric NOT NULL DEFAULT 1,
+    jortype_id text,   
+    notes text,  
+    cc1_id character varying(50),
+    cc2_id character varying(50),
+    CONSTRAINT pky_jorcyc PRIMARY KEY (id)
+);
+--------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
+CREATE TABLE acc.tbl_jordcyc
+(
+    id integer NOT NULL,
+    jorcyc_id smallint NOT NULL,
+    debit numeric NOT NULL DEFAULT 0,
+    credit numeric NOT NULL DEFAULT 0,
+    chart_id text NOT NULL,
+    currency_id character varying(2) NOT NULL,
+    currencyprice numeric NOT NULL DEFAULT 1,
+    jortype_id text,
+    notes text,
+    cc1_id character varying(50),
+    cc2_id character varying(50),    
+    CONSTRAINT pky_jordcyc PRIMARY KEY (id)
+);
+--------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
+CREATE VIEW acc.viw_jorcyc_select AS
+ SELECT
+ 	h.id AS h_id,
+    h.currency_id AS h_currency_id,
+    h.currencyprice AS h_currencyprice,
+    h.jortype_id AS h_jortype_id,
+    h.notes AS h_notes,
+    h.cc1_id AS h_cc1_id,
+    h.cc2_id AS h_cc2_id,
+    d.debit AS d_debit,
+    d.credit AS d_credit,
+    d.chart_id AS d_chart_id,
+    c.aname AS d_chart_aname,
+    c.ename AS d_chart_ename,
+    d.currency_id AS d_currency_id,
+    d.currencyprice AS d_currencyprice,
+    d.jortype_id AS d_jortype_id,
+    d.notes AS d_notes,
+    cc1.aname AS d_cc1_aname,
+    cc1.ename AS d_cc1_ename,
+    d.cc1_id AS d_cc1_id,
+    cc2.aname AS d_cc2_aname,
+    cc2.ename AS d_cc2_ename,
+    d.cc2_id AS d_cc2_id
+   FROM acc.tbl_jordcyc d
+     LEFT JOIN acc.tbl_jorcyc h ON d.jorcyc_id::text = h.id::text
+     LEFT JOIN acc.tbl_chart c ON d.chart_id = c.id::text
+     LEFT JOIN acc.tbl_cc cc1 ON d.cc1_id::text = cc1.id::text
+     LEFT JOIN acc.tbl_cc cc2 ON d.cc2_id::text = cc2.id::text
+  ORDER BY d.ctid;
+--------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION acc.fnc_jorcyc_insert(
+	in_id int,
+	in_currency_id character varying,
+	in_currencyprice numeric,
+	in_jortype_id text,
+	in_notes text,
+	in_cc1_id character varying,
+	in_cc2_id character varying,	
+	in_jord json)
+    RETURNS SETOF acc.viw_jorcyc_select 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+AS $BODY$
+
+declare 
+	on_jorD_id integer;
+	on_jorRefType text;
+	on_audit_id bigint;
+-------------------------------------------
+	i jsonb;
+	on_jorD_debit numeric;
+	on_jorD_credit numeric;
+	on_jorD_chart_id text;
+	on_jorD_notes text;
+	on_jorD_cc1_id text;
+	on_jorD_cc2_id text;
+--------------------------------------------
+	ex_id integer;
+	ex_sqlstate text;
+	ex_colname text; 
+	ex_constraintname text; 
+	ex_datatype text; 
+	ex_msgtext text; 
+	ex_tablename text; 
+	ex_schemaname text; 
+	ex_details text; 
+	ex_hint text; 
+	ex_context text; 
+BEGIN
+	ex_id = (select(select max(id) from grl.tbl_ex) + 1); if ex_id is null then ex_id = 1; end if;
+	on_jorD_id = (select(select max(id) from acc.tbl_jordcyc) + 1); if on_jorD_id is null then on_jorD_id = 1; end if;
+					 
+	in_id = (select(select max(id) from acc.tbl_jorcyc) + 1);
+    in_id = (select case when (in_id is NULL) then 1 else in_id end);								
+------------------------------------------------------------------------------------------------------INSERT INTO jorcyc
+INSERT INTO acc.tbl_jorcyc(
+	id, 
+	currency_id, 
+	currencyprice, 
+	jortype_id, 
+	notes, 	
+	cc1_id, 
+	cc2_id
+	)
+	VALUES (
+		in_id, 
+		in_currency_id, 
+		in_currencyprice, 
+		in_jortype_id,
+		in_notes,
+		in_cc1_id, 
+		in_cc2_id
+		);
+------------------------------------------------------------------------------------------------------INSERT INTO jorDcyc
+FOR i IN SELECT * FROM json_array_elements(in_jord)
+  LOOP
+  	on_jorD_debit := i->>'debit';
+    on_jorD_credit := i->>'credit';
+    on_jorD_chart_id := i->>'chart_id';
+    on_jorD_notes := i->>'notes';
+    on_jorD_cc1_id := i->>'cc1_id';
+    on_jorD_cc2_id := i->>'cc2_id';
+	
+ 	on_jorD_debit = (select case when (on_jorD_debit IS NULL) THEN 0 else on_jorD_debit end);
+	on_jorD_credit = (select case when (on_jorD_credit IS NULL) THEN 0 else on_jorD_credit end);
+	on_jorD_notes = (select case when (on_jorD_notes IS NULL OR on_jorD_notes = '') THEN in_notes else on_jorD_notes end);
+	on_jorD_cc1_id = (select case when (on_jorD_cc1_id IS NULL OR on_jorD_cc1_id = '') THEN in_cc1_id else on_jorD_cc1_id end);
+	on_jorD_cc2_id = (select case when (on_jorD_cc2_id IS NULL OR on_jorD_cc2_id = '') THEN in_cc2_id else on_jorD_cc2_id end);
+	
+	INSERT INTO acc.tbl_jordcyc(
+	id, 
+	jorcyc_id, 
+	debit, 
+	credit, 
+	chart_id, 
+	currency_id, 
+	currencyprice, 
+	jortype_id, 
+	notes, 
+	cc1_id, 
+	cc2_id
+	)
+	VALUES (
+		on_jorD_id, 
+		in_id, 
+		on_jorD_debit, 
+		on_jorD_credit, 
+		on_jorD_chart_id, 	
+		in_currency_id, 
+		in_currencyprice, 
+		in_jortype_id, 
+		on_jorD_notes, 	
+		on_jorD_cc1_id, 
+		on_jorD_cc2_id
+		);
+		
+	on_jorD_id = on_jorD_id + 1;
+ END LOOP;
+------------------------------------------------------------------------------------------------------Success Return
+RETURN QUERY select * from acc.viw_jorcyc_Select;
+------------------------------------------------------------------------------------------------------EX
+EXCEPTION WHEN OTHERS THEN
+	GET STACKED DIAGNOSTICS
+		ex_sqlstate = RETURNED_SQLSTATE,
+		ex_colname = COLUMN_NAME,
+		ex_constraintname = CONSTRAINT_NAME,
+		ex_datatype = PG_DATATYPE_NAME,
+		ex_msgtext = MESSAGE_TEXT,
+		ex_tablename = TABLE_NAME,
+		ex_schemaname = SCHEMA_NAME,
+		ex_details = PG_EXCEPTION_DETAIL,
+		ex_hint = PG_EXCEPTION_HINT,
+		ex_context = PG_EXCEPTION_CONTEXT;
+	DROP TABLE IF EXISTS temp_EX;
+	CREATE TEMP TABLE temp_EX as SELECT * from acc.viw_jorcyc_Select where h_id = '0';
+	INSERT INTO temp_EX(h_notes)VALUES('PostgreSQL'||','|| ex_id || ',' || ex_sqlstate || ',' || ex_msgtext || ',' || ex_context);
+------------------------------------------------------------------------------------------------------INSERT INTO ex
+INSERT INTO grl.tbl_ex(
+id, sqlstate, colname, constraintname, datatype, msgtext, tablename, schemaname, details, hint, context, doc_id)
+VALUES(ex_id, ex_sqlstate, ex_colname, ex_constraintname, ex_datatype, ex_msgtext, ex_tablename, ex_schemaname, ex_details, ex_hint, ex_context, in_id);
+------------------------------------------------------------------------------------------------------Faild Return
+return QUERY select * from temp_EX;
+End
+
+$BODY$;
+--------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------

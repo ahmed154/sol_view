@@ -1,0 +1,6 @@
+INSERT INTO grl.tbl_update(
+	id,
+	ddate)
+	VALUES 
+	(1,
+	(select(current_timestamp)));

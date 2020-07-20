@@ -1,0 +1,23 @@
+DROP VIEW acc.viw_st;
+--------------------------------------------------------------------------------------
+CREATE OR REPLACE VIEW acc.viw_st AS
+ SELECT j.chart_id,
+    j.debit,
+    j.credit,
+    j.notes,
+    j.jor_id,
+    j.creationtime AS date,
+    j.doctype_id,
+    j.cc1_id,
+    j.cc2_id,
+    j.branch_id,
+    j.company_id,
+	j.doc_id,
+	j.fyear_id,
+	j.jortype_id,
+    d.aname AS doctype_aname,
+    d.ename AS doctype_ename
+   FROM acc.tbl_jord j
+     LEFT JOIN grl.tbl_doctype d ON j.doctype_id = d.id
+  ORDER BY j.jor_id;
+

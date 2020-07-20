@@ -1,0 +1,15 @@
+CREATE TABLE grl.tbl_bank
+(
+    id smallint NOT NULL,
+    aname text COLLATE pg_catalog."default",
+    ename text COLLATE pg_catalog."default",
+    notes text COLLATE pg_catalog."default",
+    CONSTRAINT pky_bank PRIMARY KEY (id)
+);
+INSERT INTO grl.tbl_bank(
+	id, aname, ename)
+	VALUES 
+	(1, '»‰ﬂ «·—«ÃÕÌ', 'AlRajhi Bank'),
+	(2, '«·»‰ﬂ «·√Â·Ì', 'Alahli Bank'),
+	(3, '»‰ﬂ «·»·«œ', 'Bilad Bank'),
+	(4, '»‰ﬂ «·≈‰„«¡', 'Alinma Bank');

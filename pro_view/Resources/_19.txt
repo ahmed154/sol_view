@@ -1,0 +1,62 @@
+DROP VIEW IF EXISTS acc.viw_st;
+DROP VIEW IF EXISTS acc.viw_tb;
+--------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------
+CREATE OR REPLACE VIEW acc.viw_st AS
+ SELECT j.chart_id,
+    j.debit,
+    j.credit,
+    j.notes,
+    j.jor_id,
+    j.creationtime AS date,
+    j.doctype_id,
+    j.cc1_id,
+    j.cc2_id,
+    j.branch_id,
+    j.company_id,
+	j.doc_id,
+	j.fyear_id,
+	j.jortype_id,
+    d.aname AS doctype_aname,
+    d.ename AS doctype_ename
+   FROM acc.tbl_jord j
+     LEFT JOIN grl.tbl_doctype d ON j.doctype_id = d.id
+  ORDER BY j.jor_id;
+--------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------
+CREATE VIEW acc.viw_tb AS
+ SELECT c.id,
+    c.aname,
+    c.ename,
+    ( SELECT
+                CASE
+                    WHEN (c.parent = true) THEN ( SELECT sum((d.debit * d.currencyprice)) AS sum
+                       FROM acc.tbl_jord d
+                      WHERE (d.chart_id = ((c.id)::text || '%'::text)) AND jortype_id != '2')
+                    ELSE (j.debit * j.currencyprice)
+                END AS "case") AS debit,
+    ( SELECT
+                CASE
+                    WHEN (c.parent = true) THEN ( SELECT sum((d.credit * d.currencyprice)) AS sum
+                       FROM acc.tbl_jord d
+                      WHERE (d.chart_id = ((c.id)::text || '%'::text)) AND jortype_id != '2')
+                    ELSE (j.credit * j.currencyprice)
+                END AS "case") AS credit,
+    j.creationtime AS date,
+    c.level,
+    c.parent_id,
+    c.parent,
+    c.menue_id,
+    c.side_id,
+    j.cc1_id,
+    j.cc2_id,
+    j.branch_id,
+    j.company_id,
+	j.fyear_id,
+	j.jortype_id
+   FROM (acc.tbl_chart c
+     LEFT JOIN acc.tbl_jord j ON (((c.id)::text = j.chart_id)))
+	 WHERE j.jortype_id != '2' OR j.jortype_id IS null
+  ORDER BY c.id;
+--------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------
