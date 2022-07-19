@@ -40,7 +40,7 @@
             this.txt_Authorization.Location = new System.Drawing.Point(141, 72);
             this.txt_Authorization.Name = "txt_Authorization";
             this.txt_Authorization.ReadOnly = true;
-            this.txt_Authorization.Size = new System.Drawing.Size(100, 27);
+            this.txt_Authorization.Size = new System.Drawing.Size(100, 36);
             this.txt_Authorization.TabIndex = 0;
             this.txt_Authorization.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
@@ -48,7 +48,7 @@
             // 
             this.txt_Run.Location = new System.Drawing.Point(141, 119);
             this.txt_Run.Name = "txt_Run";
-            this.txt_Run.Size = new System.Drawing.Size(100, 27);
+            this.txt_Run.Size = new System.Drawing.Size(100, 36);
             this.txt_Run.TabIndex = 0;
             this.txt_Run.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
@@ -57,7 +57,7 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(44, 75);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(91, 19);
+            this.label1.Size = new System.Drawing.Size(135, 29);
             this.label1.TabIndex = 2;
             this.label1.Text = "رقم التفويض";
             // 
@@ -66,7 +66,7 @@
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(39, 122);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(96, 19);
+            this.label2.Size = new System.Drawing.Size(139, 29);
             this.label2.TabIndex = 3;
             this.label2.Text = "رقم التشغيل";
             // 
@@ -80,12 +80,12 @@
             this.btn_Run.UseVisualStyleBackColor = true;
             this.btn_Run.Click += new System.EventHandler(this.btn_Run_Click);
             // 
-            // frm_PreventNo
+            // frm_preventnu
             // 
             this.AcceptButton = this.btn_Run;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 19F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 29F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(284, 279);
+            this.ClientSize = new System.Drawing.Size(311, 279);
             this.Controls.Add(this.btn_Run);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);

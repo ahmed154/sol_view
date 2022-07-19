@@ -22,10 +22,9 @@ namespace pro_view.fld_PL.fld_School.fld_General_Setting
         public frm_Nationality()
         {
             InitializeComponent();
-            dgv.AutoGenerateColumns = false;
-            
-            
+            dgv.AutoGenerateColumns = false;         
         }
+
         #region Form
         private void frm_G_Shown(object sender, EventArgs e)
         {
@@ -196,8 +195,7 @@ namespace pro_view.fld_PL.fld_School.fld_General_Setting
                     ClearForm();
 
                     if (dgv.CurrentRow != null) dgv.CurrentRow.Selected = false;
-                    break;
-                    
+                    break;               
                     #endregion
             }
         }
@@ -423,8 +421,17 @@ namespace pro_view.fld_PL.fld_School.fld_General_Setting
                 Form_Mode("Select");
             }
         }
+
         #endregion
 
+        private void gbx_Details_Enter(object sender, EventArgs e)
+        {
 
+        }
+
+        private void frm_Nationality_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

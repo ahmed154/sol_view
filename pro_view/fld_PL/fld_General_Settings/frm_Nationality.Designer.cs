@@ -68,7 +68,7 @@
             this.txt_aname.Location = new System.Drawing.Point(251, 79);
             this.txt_aname.Name = "txt_aname";
             this.txt_aname.ReadOnly = true;
-            this.txt_aname.Size = new System.Drawing.Size(335, 22);
+            this.txt_aname.Size = new System.Drawing.Size(335, 29);
             this.txt_aname.TabIndex = 1;
             this.txt_aname.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
@@ -78,7 +78,7 @@
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(592, 81);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(48, 14);
+            this.label2.Size = new System.Drawing.Size(72, 22);
             this.label2.TabIndex = 2;
             this.label2.Text = "الأسم ع";
             // 
@@ -88,7 +88,7 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(592, 54);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(30, 14);
+            this.label1.Size = new System.Drawing.Size(45, 22);
             this.label1.TabIndex = 0;
             this.label1.Text = "الكود";
             // 
@@ -104,9 +104,10 @@
             this.gbx_Details.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gbx_Details.Location = new System.Drawing.Point(0, 106);
             this.gbx_Details.Name = "gbx_Details";
-            this.gbx_Details.Size = new System.Drawing.Size(722, 352);
+            this.gbx_Details.Size = new System.Drawing.Size(722, 463);
             this.gbx_Details.TabIndex = 10;
             this.gbx_Details.TabStop = false;
+            this.gbx_Details.Enter += new System.EventHandler(this.gbx_Details_Enter);
             // 
             // gbx_info
             // 
@@ -119,7 +120,7 @@
             this.gbx_info.Controls.Add(this.lbl_creationtime);
             this.gbx_info.Controls.Add(this.label22);
             this.gbx_info.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.gbx_info.Location = new System.Drawing.Point(3, 278);
+            this.gbx_info.Location = new System.Drawing.Point(3, 389);
             this.gbx_info.Name = "gbx_info";
             this.gbx_info.Size = new System.Drawing.Size(716, 71);
             this.gbx_info.TabIndex = 42;
@@ -215,7 +216,7 @@
             this.txt_ename.Location = new System.Drawing.Point(251, 107);
             this.txt_ename.Name = "txt_ename";
             this.txt_ename.ReadOnly = true;
-            this.txt_ename.Size = new System.Drawing.Size(335, 22);
+            this.txt_ename.Size = new System.Drawing.Size(335, 29);
             this.txt_ename.TabIndex = 2;
             this.txt_ename.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
@@ -225,7 +226,7 @@
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(592, 109);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(48, 14);
+            this.label3.Size = new System.Drawing.Size(71, 22);
             this.label3.TabIndex = 4;
             this.label3.Text = "الأسم E";
             // 
@@ -235,7 +236,7 @@
             this.txt_id.Location = new System.Drawing.Point(513, 52);
             this.txt_id.Name = "txt_id";
             this.txt_id.ReadOnly = true;
-            this.txt_id.Size = new System.Drawing.Size(73, 22);
+            this.txt_id.Size = new System.Drawing.Size(73, 29);
             this.txt_id.TabIndex = 0;
             this.txt_id.TabStop = false;
             this.txt_id.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -254,13 +255,14 @@
             this.ID,
             this.gName});
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgv.Location = new System.Drawing.Point(3, 18);
+            this.dgv.Location = new System.Drawing.Point(3, 25);
             this.dgv.MultiSelect = false;
             this.dgv.Name = "dgv";
             this.dgv.ReadOnly = true;
             this.dgv.RowHeadersVisible = false;
+            this.dgv.RowHeadersWidth = 62;
             this.dgv.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgv.Size = new System.Drawing.Size(223, 331);
+            this.dgv.Size = new System.Drawing.Size(223, 435);
             this.dgv.TabIndex = 0;
             this.dgv.SelectionChanged += new System.EventHandler(this.dgv_SelectionChanged);
             // 
@@ -270,6 +272,7 @@
             this.ID.DataPropertyName = "ID";
             this.ID.FillWeight = 71.066F;
             this.ID.HeaderText = "الكود";
+            this.ID.MinimumWidth = 8;
             this.ID.Name = "ID";
             this.ID.ReadOnly = true;
             this.ID.Width = 70;
@@ -279,6 +282,7 @@
             this.gName.DataPropertyName = "aname";
             this.gName.FillWeight = 128.9341F;
             this.gName.HeaderText = "الأسم";
+            this.gName.MinimumWidth = 8;
             this.gName.Name = "gName";
             this.gName.ReadOnly = true;
             // 
@@ -288,7 +292,7 @@
             this.grbx_Grid.Dock = System.Windows.Forms.DockStyle.Right;
             this.grbx_Grid.Location = new System.Drawing.Point(722, 106);
             this.grbx_Grid.Name = "grbx_Grid";
-            this.grbx_Grid.Size = new System.Drawing.Size(229, 352);
+            this.grbx_Grid.Size = new System.Drawing.Size(229, 463);
             this.grbx_Grid.TabIndex = 11;
             this.grbx_Grid.TabStop = false;
             // 
@@ -418,9 +422,9 @@
             // 
             // frm_Nationality
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 22F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(951, 458);
+            this.ClientSize = new System.Drawing.Size(951, 569);
             this.Controls.Add(this.gbx_Details);
             this.Controls.Add(this.grbx_Grid);
             this.Controls.Add(this.grbx_Controls);
@@ -433,6 +437,7 @@
             this.RightToLeftLayout = true;
             this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Load += new System.EventHandler(this.frm_Nationality_Load);
             this.Shown += new System.EventHandler(this.frm_G_Shown);
             this.gbx_Details.ResumeLayout(false);
             this.gbx_Details.PerformLayout();
